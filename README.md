@@ -19,9 +19,11 @@ uletodo is designed for personal task management with a focus on simplicity, eff
 
 ## Documentation
 
-- 📋 [Requirements](doc/requirements.md) - Detailed project requirements and specifications
-- 📅 [Development Plan](doc/plan.md) - Project roadmap and development milestones
-- 📖 [Basic Guidelines](doc/basic.md) - Development guidelines and principles
+Project documentation is managed through Kiro IDE steering rules and specifications. Key documents include:
+
+- 📋 Requirements and specifications
+- 📅 Development plan and milestones  
+- 📖 Development guidelines and principles
 
 ## Technology Stack
 
@@ -35,7 +37,7 @@ uletodo is designed for personal task management with a focus on simplicity, eff
 
 🚧 **Current Phase**: M0 - Documentation and Environment Setup
 
-See [Development Plan](doc/plan.md) for detailed roadmap and milestones.
+See project specifications for detailed roadmap and milestones.
 
 ## Getting Started
 

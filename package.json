@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "description": "A modern, cross-platform desktop todo application built with Tauri + TypeScript + React + Rust.",
   "main": "index.js",
-  "directories": {
-    "doc": "doc"
-  },
+
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
