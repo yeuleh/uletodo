@@ -1,0 +1,70 @@
+.timepicker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.timepicker--full-width {
+  width: 100%;
+}
+
+.timepicker__label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: inherit;
+}
+
+.timepicker__field {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 1rem;
+  background-color: transparent;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.timepicker__field:hover {
+  border-color: #9ca3af;
+}
+
+.timepicker__field:focus {
+  outline: 2px solid #646cff;
+  outline-offset: -2px;
+}
+
+/* Error state */
+.timepicker--error .timepicker__field {
+  border-color: #ef4444;
+}
+
+.timepicker--error .timepicker__field:focus {
+  outline-color: #ef4444;
+}
+
+.timepicker__helper {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.timepicker__helper--error {
+  color: #ef4444;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .timepicker__field {
+    border-color: #4b5563;
+    color: rgba(255, 255, 255, 0.87);
+    background-color: transparent;
+  }
+  
+  .timepicker__field:hover {
+    border-color: #6b7280;
+  }
+  
+  .timepicker__helper {
+    color: #9ca3af;
+  }
+}

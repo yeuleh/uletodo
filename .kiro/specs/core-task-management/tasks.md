@@ -69,51 +69,51 @@
   - Create data export/import commands for backup
   - _Requirements: 12.4, 12.5_
 
-- [ ] 5. Build frontend service layer
-- [ ] 5.1 Create TaskService frontend wrapper
+- [x] 5. Build frontend service layer
+- [x] 5.1 Create TaskService frontend wrapper
   - Implement frontend TaskService class wrapping Tauri commands
   - Add error handling and loading state management
   - Create type-safe command invocation methods
   - Implement optimistic updates for better UX
   - _Requirements: 1.1, 2.1, 3.1, 4.1, 5.1_
 
-- [ ] 5.2 Build TagService frontend integration
+- [x] 5.2 Build TagService frontend integration
   - Create TagService class for tag operations
   - Implement tag autocomplete and suggestion logic
   - Add tag color management and display utilities
   - _Requirements: 11.1, 11.3, 11.8_
 
-- [ ] 5.3 Add state management with Zustand
+- [x] 5.3 Add state management with Zustand
   - Create task store for managing task list state
   - Implement tag store for tag management
   - Add UI state store for modals, filters, and selections
   - Create store actions and selectors
   - _Requirements: 2.1, 2.2, 11.6_
 
-- [ ] 6. Implement core UI components
-- [ ] 6.1 Build common UI components
+- [x] 6. Implement core UI components
+- [x] 6.1 Build common UI components
   - Create Button, Input, Modal, DatePicker, TimePicker components
   - Implement PrioritySelector with color-coded options
   - Build ConfirmDialog for delete operations
   - Add LoadingSpinner and ErrorMessage components
   - _Requirements: 1.1, 4.1, 6.1, 7.1, 9.1_
 
-- [ ] 6.2 Create TagSelector component
+- [x] 6.2 Create TagSelector component
   - Implement multi-select tag input with autocomplete
   - Add tag creation functionality within selector
   - Build tag display with color coding
   - Create tag removal and editing capabilities
   - _Requirements: 11.1, 11.3, 11.4, 11.8_
 
-- [ ] 6.3 Build TaskForm component
+- [x] 6.3 Build TaskForm component
   - Create comprehensive task creation/editing form
   - Implement all task fields: title, description, priority, due date, duration
   - Add tag selection and subtask creation options
   - Include form validation and error display
   - _Requirements: 1.1, 3.1, 6.1, 7.1, 8.1, 9.1, 10.1, 11.1_
 
-- [ ] 7. Create task list and display components
-- [ ] 7.1 Implement TaskItem component
+- [-] 7. Create task list and display components
+- [x] 7.1 Implement TaskItem component
   - Build individual task display with all metadata
   - Add completion status toggle functionality
   - Implement priority and due date visual indicators
@@ -121,7 +121,7 @@
   - Add quick action buttons (edit, delete, add subtask)
   - _Requirements: 2.3, 5.1, 6.3, 7.3, 10.3, 11.4_
 
-- [ ] 7.2 Build TaskList component
+- [x] 7.2 Build TaskList component
   - Create scrollable task list with virtual scrolling for performance
   - Implement task sorting by creation date, due date, priority
   - Add empty state display for no tasks

@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "A modern, cross-platform desktop todo application built with Tauri + TypeScript + React + Rust.",
   "main": "index.js",
-
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -33,6 +32,7 @@
   "dependencies": {
     "@tauri-apps/api": "^2.8.0",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "zustand": "^5.0.8"
   }
 }

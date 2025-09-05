@@ -1,0 +1,91 @@
+.input {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.input--full-width {
+  width: 100%;
+}
+
+.input__label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: inherit;
+}
+
+.input__field {
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.input__field:focus {
+  outline: 2px solid #646cff;
+  outline-offset: -2px;
+}
+
+/* Variants */
+.input--outlined .input__field {
+  border: 1px solid #d1d5db;
+  background-color: transparent;
+}
+
+.input--outlined .input__field:hover {
+  border-color: #9ca3af;
+}
+
+.input--filled .input__field {
+  border: 1px solid transparent;
+  background-color: #f3f4f6;
+}
+
+.input--filled .input__field:hover {
+  background-color: #e5e7eb;
+}
+
+/* Error state */
+.input--error .input__field {
+  border-color: #ef4444;
+}
+
+.input--error .input__field:focus {
+  outline-color: #ef4444;
+}
+
+.input__helper {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.input__helper--error {
+  color: #ef4444;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .input--outlined .input__field {
+    border-color: #4b5563;
+    color: rgba(255, 255, 255, 0.87);
+  }
+  
+  .input--outlined .input__field:hover {
+    border-color: #6b7280;
+  }
+  
+  .input--filled .input__field {
+    background-color: #374151;
+    color: rgba(255, 255, 255, 0.87);
+  }
+  
+  .input--filled .input__field:hover {
+    background-color: #4b5563;
+  }
+  
+  .input__helper {
+    color: #9ca3af;
+  }
+}

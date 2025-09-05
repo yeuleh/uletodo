@@ -1,0 +1,162 @@
+.task-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.task-form__header {
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 1rem;
+}
+
+.task-form__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: inherit;
+}
+
+.task-form__error--general {
+  padding: 0.75rem;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  color: #991b1b;
+  font-size: 0.875rem;
+}
+
+.task-form__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.task-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.task-form__label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: inherit;
+}
+
+.task-form__textarea {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 1rem;
+  background-color: transparent;
+  transition: all 0.2s ease;
+  outline: none;
+  resize: vertical;
+  min-height: 100px;
+}
+
+.task-form__textarea:hover {
+  border-color: #9ca3af;
+}
+
+.task-form__textarea:focus {
+  outline: 2px solid #646cff;
+  outline-offset: -2px;
+}
+
+.task-form__textarea--error {
+  border-color: #ef4444;
+}
+
+.task-form__textarea--error:focus {
+  outline-color: #ef4444;
+}
+
+.task-form__field-error {
+  font-size: 0.75rem;
+  color: #ef4444;
+}
+
+.task-form__field-helper {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.task-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.task-form__duration {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem;
+  align-items: start;
+}
+
+.task-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .task-form {
+    max-width: none;
+    margin: 0;
+  }
+  
+  .task-form__row {
+    grid-template-columns: 1fr;
+  }
+  
+  .task-form__duration {
+    grid-template-columns: 1fr;
+  }
+  
+  .task-form__actions {
+    flex-direction: column-reverse;
+  }
+  
+  .task-form__actions button {
+    width: 100%;
+  }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .task-form__header {
+    border-bottom-color: #374151;
+  }
+  
+  .task-form__error--general {
+    background-color: #450a0a;
+    border-color: #7f1d1d;
+    color: #fca5a5;
+  }
+  
+  .task-form__textarea {
+    border-color: #4b5563;
+    color: rgba(255, 255, 255, 0.87);
+    background-color: transparent;
+  }
+  
+  .task-form__textarea:hover {
+    border-color: #6b7280;
+  }
+  
+  .task-form__field-helper {
+    color: #9ca3af;
+  }
+  
+  .task-form__actions {
+    border-top-color: #374151;
+  }
+}

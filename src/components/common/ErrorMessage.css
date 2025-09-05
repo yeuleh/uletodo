@@ -1,0 +1,124 @@
+.error-message {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 1rem;
+  border-radius: 6px;
+  border: 1px solid;
+  gap: 1rem;
+}
+
+.error-message--error {
+  background-color: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.error-message--warning {
+  background-color: #fffbeb;
+  border-color: #fed7aa;
+  color: #92400e;
+}
+
+.error-message--info {
+  background-color: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1e40af;
+}
+
+.error-message__content {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.error-message__icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.error-message__text {
+  flex: 1;
+}
+
+.error-message__title {
+  margin: 0 0 0.25rem 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.error-message__message {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.error-message__actions {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.error-message__button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.error-message__button--retry {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.error-message__button--retry:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.error-message__button--dismiss {
+  color: inherit;
+  font-size: 1.25rem;
+  line-height: 1;
+  padding: 0.125rem 0.25rem;
+}
+
+.error-message__button--dismiss:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .error-message--error {
+    background-color: #450a0a;
+    border-color: #7f1d1d;
+    color: #fca5a5;
+  }
+  
+  .error-message--warning {
+    background-color: #451a03;
+    border-color: #a16207;
+    color: #fcd34d;
+  }
+  
+  .error-message--info {
+    background-color: #1e3a8a;
+    border-color: #3730a3;
+    color: #93c5fd;
+  }
+  
+  .error-message__button--retry:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .error-message__button--dismiss:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+}
