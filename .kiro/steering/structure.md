@@ -6,13 +6,10 @@
 uletodo/
 ├── .git/                    # Git version control
 ├── .kiro/                   # Kiro IDE configuration and steering rules
-├── doc/                     # Project documentation
-│   ├── requirements.md      # Detailed requirements specification
-│   ├── plan.md             # Development plan and milestones
-│   └── basic.md            # Basic development guidelines
-├── public/                  # Static assets for web interface
+├── public/                  # Static assets for web interface (Vite assets)
 ├── src/                     # Frontend React/TypeScript source
 ├── src-tauri/              # Rust backend source
+├── index.html              # Main HTML entry point
 ├── package.json            # Node.js dependencies and scripts
 ├── tsconfig.json           # TypeScript configuration
 ├── vite.config.ts          # Vite build configuration
@@ -91,17 +88,19 @@ src-tauri/src/
 └── error.rs              # Error handling and types
 ```
 
-## Documentation Structure (`doc/`)
+## Documentation Structure
 
-```
-doc/
-├── requirements.md       # Comprehensive requirements document (Chinese)
-├── plan.md              # Development plan with milestones (Chinese)
-├── basic.md             # Basic development guidelines (Chinese)
-└── api/                 # API documentation (planned)
-    ├── commands.md      # Tauri command documentation
-    └── database.md      # Database schema documentation
-```
+项目文档主要存储在以下位置：
+- **README.md** - 项目概述和快速开始指南
+- **.kiro/steering/** - 开发指导文档
+  - `product.md` - 产品概述
+  - `tech.md` - 技术栈和构建系统
+  - `structure.md` - 项目结构组织
+  - `development.md` - 开发指南和最佳实践
+
+未来计划添加的文档：
+- **API 文档** - Tauri 命令和数据库 schema 文档
+- **用户手册** - 应用使用说明
 
 ## Configuration Files
 
