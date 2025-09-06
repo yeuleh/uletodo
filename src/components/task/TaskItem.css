@@ -148,8 +148,15 @@
   flex-wrap: wrap;
 }
 
+.task-item__due-date-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .task-item__due-date,
-.task-item__duration {
+.task-item__duration,
+.task-item__time-range {
   display: flex;
   align-items: center;
   gap: 0.25rem;
@@ -157,44 +164,56 @@
   color: #6b7280;
 }
 
-.task-item__due-date--overdue {
-  color: #ef4444;
+.task-item__time-range {
   font-weight: 500;
 }
 
-.task-item__due-date--due-soon {
-  color: #f59e0b;
-  font-weight: 500;
+/* Expand/collapse button */
+.task-item__expand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 0.125rem;
+  flex-shrink: 0;
+  border-radius: 4px;
+  transition: all 0.2s ease;
 }
 
-/* Progress bar */
+.task-item__expand:hover {
+  background-color: rgba(100, 108, 255, 0.1);
+}
+
+.task-item__expand-icon {
+  transition: transform 0.2s ease;
+}
+
+.task-item__expand-icon--expanded {
+  transform: rotate(45deg);
+}
+
+/* Progress indicator */
 .task-item__progress {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   margin-top: 0.25rem;
+  width: 100%;
 }
 
-.task-item__progress-bar {
+.task-item__progress .progress-indicator {
   flex: 1;
-  height: 4px;
-  background-color: #e5e7eb;
-  border-radius: 2px;
-  overflow: hidden;
 }
 
-.task-item__progress-fill {
-  height: 100%;
-  background-color: #646cff;
-  transition: width 0.3s ease;
-}
-
-.task-item__progress-text {
+.task-item__progress-loading {
   font-size: 0.75rem;
-  color: #6b7280;
-  font-weight: 500;
-  min-width: 2.5rem;
-  text-align: right;
+  color: #9ca3af;
+  font-style: italic;
 }
 
 /* Actions */
@@ -249,8 +268,12 @@
     background-color: #374151;
   }
   
-  .task-item__progress-text {
-    color: #9ca3af;
+  .task-item__progress-loading {
+    color: #6b7280;
+  }
+  
+  .task-item__expand:hover {
+    background-color: rgba(100, 108, 255, 0.15);
   }
 }
 
@@ -279,6 +302,12 @@
 }
 
 .task-item__checkbox:focus-visible {
+  outline: 2px solid #646cff;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.task-item__expand:focus-visible {
   outline: 2px solid #646cff;
   outline-offset: 2px;
   border-radius: 4px;

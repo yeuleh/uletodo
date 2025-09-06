@@ -1,0 +1,77 @@
+.time-status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Size variants */
+.time-status-indicator--small {
+  font-size: 0.75rem;
+  padding: 0.0625rem 0.25rem;
+}
+
+.time-status-indicator--medium {
+  font-size: 0.875rem;
+  padding: 0.125rem 0.375rem;
+}
+
+.time-status-indicator--large {
+  font-size: 1rem;
+  padding: 0.25rem 0.5rem;
+}
+
+/* Status variants */
+.time-status-indicator--overdue {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.time-status-indicator--due-soon {
+  background-color: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fed7aa;
+}
+
+.time-status-indicator__icon {
+  display: flex;
+  align-items: center;
+  font-size: 0.875em;
+}
+
+.time-status-indicator__label {
+  font-size: inherit;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .time-status-indicator--overdue {
+    background-color: #450a0a;
+    color: #f87171;
+    border-color: #7f1d1d;
+  }
+
+  .time-status-indicator--due-soon {
+    background-color: #451a03;
+    color: #fbbf24;
+    border-color: #92400e;
+  }
+}
+
+/* Animation for attention */
+.time-status-indicator--overdue {
+  animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}

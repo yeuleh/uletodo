@@ -3,7 +3,7 @@
  */
 
 use crate::database::{AuditLogModel, AuditLogFilter, TaskModel, CreateTaskInput, UpdateTaskInput, connection::get_db_pool};
-use crate::services::{AuditServiceImpl, TaskServiceImpl, AuditService, TaskService};
+use crate::services::{AuditServiceImpl, TaskServiceImpl, AuditService, TaskService, DetailedChangeInfo};
 use crate::database::repositories::{SqliteAuditRepository, SqliteTaskRepository};
 use crate::error::{AuditError, TaskError};
 use serde::{Deserialize, Serialize};
@@ -32,6 +32,24 @@ pub async fn get_audit_logs(
     let offset = offset.unwrap_or(0).max(0);
     
     audit_service.get_audit_logs(Some(filter.unwrap_or_default()), Some(limit), Some(offset)).await
+}
+
+#[tauri::command]
+pub async fn get_detailed_change_info(log_id: String) -> Result<Option<DetailedChangeInfo>, AuditError> {
+    let pool = get_db_pool();
+    let audit_repo = Arc::new(SqliteAuditRepository::new(pool.clone()));
+    let audit_service = AuditServiceImpl::new(audit_repo);
+    
+    audit_service.get_detailed_change_info(&log_id).await
+}
+
+#[tauri::command]
+pub async fn get_change_summary(task_id: String) -> Result<String, AuditError> {
+    let pool = get_db_pool();
+    let audit_repo = Arc::new(SqliteAuditRepository::new(pool.clone()));
+    let audit_service = AuditServiceImpl::new(audit_repo);
+    
+    audit_service.get_change_summary(&task_id).await
 }
 
 // Bulk operations for multiple task updates

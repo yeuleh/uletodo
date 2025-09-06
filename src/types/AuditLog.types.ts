@@ -25,3 +25,16 @@ export interface AuditLogFilter {
   fromDate?: Date;
   toDate?: Date;
 }
+
+export interface DetailedChangeInfo {
+  logId: string;
+  taskId: string;
+  action: AuditAction;
+  fieldName?: string;
+  oldValue?: string;
+  newValue?: string;
+  formattedOldValue?: string;
+  formattedNewValue?: string;
+  description: string;
+  timestamp: number;
+}

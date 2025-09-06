@@ -3,11 +3,14 @@ import {
   Button, 
   Input, 
   DatePicker, 
-  TimePicker, 
+  DurationInput, 
   PrioritySelector, 
   TagSelector 
 } from '@/components/common';
 import { Task, CreateTaskInput, UpdateTaskInput, TaskPriority, Tag } from '@/types';
+import { useValidation } from '@/hooks/useValidation';
+import { ValidationUtils } from '@/utils/validationUtils';
+import { ErrorHandler } from '@/utils/errorHandling';
 import './TaskForm.css';
 
 export interface TaskFormProps {
@@ -30,15 +33,15 @@ interface FormData {
   tags: string[];
 }
 
-interface FormErrors {
-  title?: string;
-  description?: string;
-  dueDate?: string;
-  estimatedDuration?: string;
-  startTime?: string;
-  tags?: string;
-  general?: string;
-}
+// interface FormErrors {
+//   title?: string;
+//   description?: string;
+//   dueDate?: string;
+//   estimatedDuration?: string;
+//   startTime?: string;
+//   tags?: string;
+//   general?: string;
+// }
 
 export const TaskForm: React.FC<TaskFormProps> = ({
   task,
@@ -61,8 +64,17 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     tags: task?.tags || [],
   });
 
-  const [errors, setErrors] = useState<FormErrors>({});
   const [isDirty, setIsDirty] = useState(false);
+
+  // Use validation hook
+  const [validationState, validationActions] = useValidation(
+    isEditing ? ValidationUtils.validateUpdateTaskInput : ValidationUtils.validateCreateTaskInput,
+    {
+      validateOnChange: false,
+      validateOnBlur: true,
+      debounceMs: 300
+    }
+  );
 
   // Mark form as dirty when any field changes
   useEffect(() => {
@@ -91,78 +103,75 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     }
   }, [formData, task]);
 
-  const validateForm = (): boolean => {
-    const newErrors: FormErrors = {};
-
-    // Title is required
-    if (!formData.title.trim()) {
-      newErrors.title = 'Title is required';
-    } else if (formData.title.length > 200) {
-      newErrors.title = 'Title must be less than 200 characters';
-    }
-
-    // Description validation
-    if (formData.description.length > 1000) {
-      newErrors.description = 'Description must be less than 1000 characters';
-    }
-
-    // Duration validation
-    if (formData.estimatedDuration !== null) {
-      if (formData.estimatedDuration < 15) {
-        newErrors.estimatedDuration = 'Duration must be at least 15 minutes';
-      } else if (formData.estimatedDuration > 1440) { // 24 hours
-        newErrors.estimatedDuration = 'Duration cannot exceed 24 hours';
-      }
-    }
-
-    // Date validation
-    if (formData.dueDate && formData.dueDate < new Date()) {
-      // Allow past dates for editing existing tasks
-      if (!isEditing) {
-        newErrors.dueDate = 'Due date cannot be in the past';
-      }
-    }
-
-    // Start time validation
-    if (formData.startTime && formData.dueDate) {
-      if (formData.startTime > formData.dueDate) {
-        newErrors.startTime = 'Start time cannot be after due date';
-      }
-    }
-
-    // Tags validation
-    if (formData.tags.length > 10) {
-      newErrors.tags = 'Maximum 10 tags allowed';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-
+  const validateForm = async (): Promise<boolean> => {
     try {
-      const taskData = {
-        title: formData.title.trim(),
-        description: formData.description.trim() || undefined,
+      // Sanitize input data
+      const sanitizedData = ValidationUtils.sanitizeTaskInput({
+        title: formData.title,
+        description: formData.description || undefined,
         priority: formData.priority,
         dueDate: formData.dueDate || undefined,
         estimatedDuration: formData.estimatedDuration || undefined,
         startTime: formData.startTime || undefined,
         tags: formData.tags,
         ...(parentTaskId && { parentId: parentTaskId }),
-      };
+      });
+
+      const result = await validationActions.validateForm(sanitizedData);
+      
+      // Additional consistency validation
+      const consistencyResult = ValidationUtils.validateTaskConsistency(sanitizedData);
+      if (!consistencyResult.isValid) {
+        validationActions.setFieldError('general', Object.values(consistencyResult.errors)[0]);
+        return false;
+      }
+
+      return result.isValid;
+    } catch (error) {
+      const appError = ErrorHandler.normalizeError(error, {
+        operation: 'form_validation',
+        additionalData: { formData, isEditing }
+      });
+      
+      validationActions.setFieldError('general', ErrorHandler.getUserFriendlyMessage(appError));
+      return false;
+    }
+  };
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    
+    const isValid = await validateForm();
+    if (!isValid) {
+      return;
+    }
+
+    try {
+      // Sanitize and prepare task data
+      const taskData = ValidationUtils.sanitizeTaskInput({
+        title: formData.title,
+        description: formData.description || undefined,
+        priority: formData.priority,
+        dueDate: formData.dueDate || undefined,
+        estimatedDuration: formData.estimatedDuration || undefined,
+        startTime: formData.startTime || undefined,
+        tags: formData.tags,
+        ...(parentTaskId && { parentId: parentTaskId }),
+      });
 
       await onSave(taskData);
+      
+      // Clear validation errors on successful save
+      validationActions.clearErrors();
     } catch (error) {
-      setErrors({
-        general: error instanceof Error ? error.message : 'Failed to save task'
+      const appError = ErrorHandler.normalizeError(error, {
+        operation: 'task_save',
+        taskId: task?.id,
+        additionalData: { isEditing, parentTaskId }
       });
+      
+      ErrorHandler.handleError(appError);
+      validationActions.setFieldError('general', ErrorHandler.getUserFriendlyMessage(appError));
     }
   };
 
@@ -173,46 +182,21 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     setFormData(prev => ({ ...prev, [field]: value }));
     
     // Clear field error when user starts typing
-    if (field in errors) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+    validationActions.clearErrors([field as string]);
+    
+    // Validate field on blur if enabled
+    if (field === 'title' || field === 'description') {
+      // Debounced validation for text fields
+      setTimeout(() => {
+        validationActions.validateField(field as string, value, {
+          allowPastDates: isEditing,
+          dueDate: field === 'startTime' ? formData.dueDate : undefined
+        });
+      }, 300);
     }
   };
 
-  const formatDurationDisplay = (minutes: number | null): string => {
-    if (!minutes) return '';
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    if (hours > 0) {
-      return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-    }
-    return `${mins}m`;
-  };
 
-  const parseDurationInput = (value: string): number | null => {
-    if (!value.trim()) return null;
-    
-    // Parse formats like "2h 30m", "2h", "30m", "150" (minutes)
-    const hourMatch = value.match(/(\d+)h/);
-    const minuteMatch = value.match(/(\d+)m/);
-    const numberMatch = value.match(/^(\d+)$/);
-    
-    let totalMinutes = 0;
-    
-    if (hourMatch) {
-      totalMinutes += parseInt(hourMatch[1]) * 60;
-    }
-    
-    if (minuteMatch) {
-      totalMinutes += parseInt(minuteMatch[1]);
-    }
-    
-    if (numberMatch && !hourMatch && !minuteMatch) {
-      // Just a number, treat as minutes
-      totalMinutes = parseInt(numberMatch[1]);
-    }
-    
-    return totalMinutes > 0 ? totalMinutes : null;
-  };
 
   return (
     <form className="task-form" onSubmit={handleSubmit}>
@@ -223,9 +207,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         </h2>
       </div>
 
-      {errors.general && (
+      {validationState.errors.general && (
         <div className="task-form__error task-form__error--general">
-          {errors.general}
+          {validationState.errors.general}
         </div>
       )}
 
@@ -234,7 +218,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
           label="Title *"
           value={formData.title}
           onChange={(e) => handleFieldChange('title', e.target.value)}
-          error={errors.title}
+          error={validationState.errors.title}
           placeholder="Enter task title..."
           fullWidth
           disabled={loading}
@@ -244,15 +228,15 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         <div className="task-form__field">
           <label className="task-form__label">Description</label>
           <textarea
-            className={`task-form__textarea ${errors.description ? 'task-form__textarea--error' : ''}`}
+            className={`task-form__textarea ${validationState.errors.description ? 'task-form__textarea--error' : ''}`}
             value={formData.description}
             onChange={(e) => handleFieldChange('description', e.target.value)}
             placeholder="Enter task description..."
             rows={4}
             disabled={loading}
           />
-          {errors.description && (
-            <div className="task-form__field-error">{errors.description}</div>
+          {validationState.errors.description && (
+            <div className="task-form__field-error">{validationState.errors.description}</div>
           )}
           <div className="task-form__field-helper">
             {formData.description.length}/1000 characters
@@ -274,7 +258,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
             availableTags={availableTags}
             onTagsChange={(tags) => handleFieldChange('tags', tags)}
             onCreateTag={onCreateTag}
-            error={errors.tags}
+            error={validationState.errors.tags}
             disabled={loading}
             maxTags={10}
           />
@@ -285,7 +269,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
             label="Due Date"
             value={formData.dueDate}
             onChange={(date) => handleFieldChange('dueDate', date)}
-            error={errors.dueDate}
+            error={validationState.errors.dueDate}
             disabled={loading}
           />
 
@@ -293,35 +277,21 @@ export const TaskForm: React.FC<TaskFormProps> = ({
             label="Start Time"
             value={formData.startTime}
             onChange={(date) => handleFieldChange('startTime', date)}
-            error={errors.startTime}
+            error={validationState.errors.startTime}
             disabled={loading}
             showTime
           />
         </div>
 
-        <div className="task-form__field">
-          <label className="task-form__label">Estimated Duration</label>
-          <div className="task-form__duration">
-            <Input
-              value={formData.estimatedDuration ? formatDurationDisplay(formData.estimatedDuration) : ''}
-              onChange={(e) => {
-                const duration = parseDurationInput(e.target.value);
-                handleFieldChange('estimatedDuration', duration);
-              }}
-              placeholder="e.g., 2h 30m, 90m, or 90"
-              error={errors.estimatedDuration}
-              disabled={loading}
-            />
-            <TimePicker
-              value={formData.estimatedDuration}
-              onChange={(minutes) => handleFieldChange('estimatedDuration', minutes)}
-              disabled={loading}
-            />
-          </div>
-          <div className="task-form__field-helper">
-            Enter duration as text (e.g., "2h 30m") or use the time picker
-          </div>
-        </div>
+        <DurationInput
+          label="Estimated Duration"
+          value={formData.estimatedDuration}
+          onChange={(minutes) => handleFieldChange('estimatedDuration', minutes)}
+          error={validationState.errors.estimatedDuration}
+          disabled={loading}
+          showPresets
+          fullWidth
+        />
       </div>
 
       <div className="task-form__actions">
@@ -337,7 +307,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
           type="submit"
           variant="primary"
           loading={loading}
-          disabled={!isDirty}
+          disabled={!isDirty || validationState.isValidating}
         >
           {isEditing ? 'Update Task' : 'Create Task'}
         </Button>

@@ -1,5 +1,8 @@
 // Utility function exports
-// These will be implemented in later tasks
+export { TimeUtils } from './timeUtils';
+export { NotificationUtils } from './notificationUtils';
+export { ValidationUtils } from './validationUtils';
+export type { ValidationResult, ValidationErrors, BusinessRuleValidationResult } from './validationUtils';
 
-// Placeholder export to make this a valid module
-export {};
+export { ErrorHandler, ErrorCode, DEFAULT_RETRY_OPTIONS } from './errorHandling';
+export type { AppError, RetryOptions, ErrorContext } from './errorHandling';

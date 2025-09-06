@@ -342,4 +342,16 @@
   .task-detail__delete-actions {
     flex-direction: column;
   }
+}/* Audit
+ timeline integration */
+.task-detail__audit-timeline {
+  margin-top: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-background);
+}
+
+/* Change summary section */
+.task-detail__section .audit-summary {
+  margin-top: 0.5rem;
 }

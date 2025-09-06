@@ -1,0 +1,168 @@
+.retry-handler {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 2rem;
+  background-color: var(--color-background);
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+}
+
+.retry-handler--loading {
+  min-height: 150px;
+}
+
+.retry-handler__content {
+  max-width: 400px;
+  text-align: center;
+}
+
+.retry-handler__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.retry-handler__icon {
+  width: 48px;
+  height: 48px;
+  color: var(--color-error);
+  flex-shrink: 0;
+}
+
+.retry-handler__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.retry-handler__text {
+  text-align: center;
+}
+
+.retry-handler__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.retry-handler__message {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  margin: 0 0 0.75rem 0;
+  line-height: 1.5;
+}
+
+.retry-handler__attempts {
+  font-size: 0.875rem;
+  color: var(--color-text-tertiary);
+  margin: 0;
+  font-style: italic;
+}
+
+.retry-handler__actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.retry-handler__max-attempts {
+  padding: 1rem;
+  background-color: var(--color-warning-background);
+  border: 1px solid var(--color-warning);
+  border-radius: 6px;
+  color: var(--color-warning-text);
+}
+
+.retry-handler__max-attempts p {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.retry-handler__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.retry-handler__loading-text {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .retry-handler {
+    min-height: 150px;
+    padding: 1.5rem;
+  }
+
+  .retry-handler__content {
+    max-width: 100%;
+  }
+
+  .retry-handler__icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .retry-handler__title {
+    font-size: 1.125rem;
+  }
+
+  .retry-handler__message {
+    font-size: 0.875rem;
+  }
+
+  .retry-handler__actions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .retry-handler__actions button {
+    width: 100%;
+    max-width: 200px;
+  }
+}
+
+/* Animation for retry attempts */
+@keyframes retryPulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.retry-handler--loading .retry-handler__loading {
+  animation: retryPulse 2s ease-in-out infinite;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .retry-handler--loading .retry-handler__loading {
+    animation: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .retry-handler {
+    border-width: 2px;
+  }
+  
+  .retry-handler__max-attempts {
+    border-width: 2px;
+  }
+}

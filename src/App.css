@@ -1,11 +1,17 @@
 #root {
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
 .app {
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
 .logo {
@@ -56,4 +62,58 @@
 .row {
   display: flex;
   justify-content: center;
+}
+/* Offline indicator styles */
+.app__offline-indicator {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--color-warning-background);
+  color: var(--color-warning-text);
+  border: 1px solid var(--color-warning);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.offline-indicator__status {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.offline-indicator__status--offline {
+  color: var(--color-error);
+}
+
+.offline-indicator__icon {
+  font-size: 1rem;
+}
+
+.offline-indicator__pending {
+  padding-left: 0.5rem;
+  border-left: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+/* Hide offline indicator when not needed */
+.offline-indicator:empty {
+  display: none;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .app__offline-indicator {
+    top: 0.5rem;
+    left: 0.5rem;
+    right: 0.5rem;
+    width: auto;
+    justify-content: center;
+  }
 }

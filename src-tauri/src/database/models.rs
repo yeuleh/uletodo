@@ -190,18 +190,36 @@ pub struct AuditLogModel {
 pub enum ValidationError {
     #[error("Task title cannot be empty")]
     EmptyTitle,
-    #[error("Task title is too long (max 500 characters)")]
+    #[error("Task title is too long (max 200 characters)")]
     TitleTooLong,
+    #[error("Task title contains invalid characters (line breaks not allowed)")]
+    InvalidTitleFormat,
     #[error("Task description is too long (max 1000 characters)")]
     DescriptionTooLong,
     #[error("Invalid duration (must be between 15 minutes and 24 hours)")]
     InvalidDuration,
+    #[error("Invalid date value")]
+    InvalidDate,
+    #[error("Start time cannot be after due date")]
+    StartTimeAfterDueDate,
+    #[error("Task duration extends beyond due date")]
+    DurationExceedsDueDate,
     #[error("Tag name cannot be empty")]
     EmptyTagName,
     #[error("Tag name is too long (max 50 characters)")]
     TagNameTooLong,
-    #[error("Invalid color format")]
+    #[error("Tag name contains invalid characters (only letters, numbers, spaces, hyphens, and underscores allowed)")]
+    InvalidTagFormat,
+    #[error("Too many tags (maximum 10 allowed)")]
+    TooManyTags,
+    #[error("Duplicate tags are not allowed")]
+    DuplicateTags,
+    #[error("Invalid color format (must be hex color like #FF0000)")]
     InvalidColor,
+    #[error("Circular dependency detected in task hierarchy")]
+    CircularDependency,
+    #[error("Maximum task depth exceeded (max 3 levels)")]
+    MaxDepthExceeded,
 }
 
 // Input structs for creating/updating records
@@ -219,23 +237,88 @@ pub struct CreateTaskInput {
 
 impl CreateTaskInput {
     pub fn validate(&self) -> Result<(), ValidationError> {
+        // Title validation
         if self.title.trim().is_empty() {
             return Err(ValidationError::EmptyTitle);
         }
         
-        if self.title.len() > 500 {
+        if self.title.len() > 200 {
             return Err(ValidationError::TitleTooLong);
         }
+
+        // Check for invalid characters in title
+        if self.title.contains('\n') || self.title.contains('\r') {
+            return Err(ValidationError::InvalidTitleFormat);
+        }
         
+        // Description validation
         if let Some(desc) = &self.description {
             if desc.len() > 1000 {
                 return Err(ValidationError::DescriptionTooLong);
             }
         }
         
+        // Duration validation
         if let Some(duration) = self.estimated_duration {
             if duration < 15 || duration > 1440 {
                 return Err(ValidationError::InvalidDuration);
+            }
+        }
+
+        // Date validation
+        if let Some(due_date) = self.due_date {
+            if due_date < 0 {
+                return Err(ValidationError::InvalidDate);
+            }
+        }
+
+        if let Some(start_time) = self.start_time {
+            if start_time < 0 {
+                return Err(ValidationError::InvalidDate);
+            }
+        }
+
+        // Cross-field validation
+        if let (Some(start_time), Some(due_date)) = (self.start_time, self.due_date) {
+            if start_time > due_date {
+                return Err(ValidationError::StartTimeAfterDueDate);
+            }
+
+            // If duration is provided, check if it fits between start and due date
+            if let Some(duration) = self.estimated_duration {
+                let duration_seconds = duration as i64 * 60;
+                if start_time + duration_seconds > due_date {
+                    return Err(ValidationError::DurationExceedsDueDate);
+                }
+            }
+        }
+
+        // Tags validation
+        if let Some(tags) = &self.tags {
+            if tags.len() > 10 {
+                return Err(ValidationError::TooManyTags);
+            }
+
+            for tag in tags {
+                if tag.trim().is_empty() {
+                    return Err(ValidationError::EmptyTagName);
+                }
+                if tag.len() > 50 {
+                    return Err(ValidationError::TagNameTooLong);
+                }
+                // Check for valid tag characters
+                if !tag.chars().all(|c| c.is_alphanumeric() || c.is_whitespace() || c == '-' || c == '_') {
+                    return Err(ValidationError::InvalidTagFormat);
+                }
+            }
+
+            // Check for duplicate tags (case-insensitive)
+            let mut unique_tags = std::collections::HashSet::new();
+            for tag in tags {
+                let normalized_tag = tag.to_lowercase().trim().to_string();
+                if !unique_tags.insert(normalized_tag) {
+                    return Err(ValidationError::DuplicateTags);
+                }
             }
         }
         
@@ -257,24 +340,85 @@ pub struct UpdateTaskInput {
 
 impl UpdateTaskInput {
     pub fn validate(&self) -> Result<(), ValidationError> {
+        // Title validation (if provided)
         if let Some(title) = &self.title {
             if title.trim().is_empty() {
                 return Err(ValidationError::EmptyTitle);
             }
-            if title.len() > 500 {
+            if title.len() > 200 {
                 return Err(ValidationError::TitleTooLong);
+            }
+            if title.contains('\n') || title.contains('\r') {
+                return Err(ValidationError::InvalidTitleFormat);
             }
         }
         
+        // Description validation (if provided)
         if let Some(desc) = &self.description {
             if desc.len() > 1000 {
                 return Err(ValidationError::DescriptionTooLong);
             }
         }
         
+        // Duration validation (if provided)
         if let Some(duration) = self.estimated_duration {
             if duration < 15 || duration > 1440 {
                 return Err(ValidationError::InvalidDuration);
+            }
+        }
+
+        // Date validation (if provided)
+        if let Some(due_date) = self.due_date {
+            if due_date < 0 {
+                return Err(ValidationError::InvalidDate);
+            }
+        }
+
+        if let Some(start_time) = self.start_time {
+            if start_time < 0 {
+                return Err(ValidationError::InvalidDate);
+            }
+        }
+
+        // Cross-field validation (if both dates are provided)
+        if let (Some(start_time), Some(due_date)) = (self.start_time, self.due_date) {
+            if start_time > due_date {
+                return Err(ValidationError::StartTimeAfterDueDate);
+            }
+
+            if let Some(duration) = self.estimated_duration {
+                let duration_seconds = duration as i64 * 60;
+                if start_time + duration_seconds > due_date {
+                    return Err(ValidationError::DurationExceedsDueDate);
+                }
+            }
+        }
+
+        // Tags validation (if provided)
+        if let Some(tags) = &self.tags {
+            if tags.len() > 10 {
+                return Err(ValidationError::TooManyTags);
+            }
+
+            for tag in tags {
+                if tag.trim().is_empty() {
+                    return Err(ValidationError::EmptyTagName);
+                }
+                if tag.len() > 50 {
+                    return Err(ValidationError::TagNameTooLong);
+                }
+                if !tag.chars().all(|c| c.is_alphanumeric() || c.is_whitespace() || c == '-' || c == '_') {
+                    return Err(ValidationError::InvalidTagFormat);
+                }
+            }
+
+            // Check for duplicate tags (case-insensitive)
+            let mut unique_tags = std::collections::HashSet::new();
+            for tag in tags {
+                let normalized_tag = tag.to_lowercase().trim().to_string();
+                if !unique_tags.insert(normalized_tag) {
+                    return Err(ValidationError::DuplicateTags);
+                }
             }
         }
         

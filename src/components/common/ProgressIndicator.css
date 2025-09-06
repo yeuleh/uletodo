@@ -1,0 +1,227 @@
+.progress-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Bar variant */
+.progress-indicator--bar {
+  flex-direction: row;
+}
+
+.progress-indicator__track {
+  flex: 1;
+  height: 6px;
+  background-color: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-indicator--small .progress-indicator__track {
+  height: 4px;
+}
+
+.progress-indicator--large .progress-indicator__track {
+  height: 8px;
+}
+
+.progress-indicator__fill {
+  height: 100%;
+  background-color: #646cff;
+  border-radius: inherit;
+  transition: width 0.3s ease;
+  position: relative;
+}
+
+.progress-indicator--animated .progress-indicator__fill {
+  animation: progressPulse 2s ease-in-out infinite;
+}
+
+@keyframes progressPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.progress-indicator__text {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.progress-indicator--small .progress-indicator__text {
+  font-size: 0.625rem;
+}
+
+.progress-indicator--large .progress-indicator__text {
+  font-size: 0.875rem;
+}
+
+.progress-indicator__count {
+  color: #374151;
+}
+
+.progress-indicator__percentage {
+  color: #6b7280;
+}
+
+/* Circle variant */
+.progress-indicator--circle {
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.progress-indicator__circle {
+  transform: rotate(-90deg);
+}
+
+.progress-indicator__circle-fill {
+  transition: stroke-dashoffset 0.3s ease;
+  stroke-linecap: round;
+}
+
+.progress-indicator__circle-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.progress-indicator--small .progress-indicator__circle-text {
+  font-size: 0.5rem;
+}
+
+.progress-indicator--large .progress-indicator__circle-text {
+  font-size: 0.75rem;
+}
+
+/* Ring variant */
+.progress-indicator--ring {
+  position: relative;
+}
+
+.progress-indicator__ring {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.progress-indicator__ring-inner {
+  background-color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress-indicator__ring-text {
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: #374151;
+  text-align: center;
+}
+
+.progress-indicator--small .progress-indicator__ring-text {
+  font-size: 0.5rem;
+}
+
+.progress-indicator--large .progress-indicator__ring-text {
+  font-size: 0.75rem;
+}
+
+/* States */
+.progress-indicator--complete .progress-indicator__fill {
+  background-color: #10b981;
+}
+
+.progress-indicator--complete .progress-indicator__circle-fill {
+  stroke: #10b981;
+}
+
+.progress-indicator--in-progress .progress-indicator__fill {
+  background-color: #3b82f6;
+}
+
+.progress-indicator--in-progress .progress-indicator__circle-fill {
+  stroke: #3b82f6;
+}
+
+.progress-indicator--not-started .progress-indicator__fill {
+  background-color: #e5e7eb;
+}
+
+.progress-indicator--not-started .progress-indicator__circle-fill {
+  stroke: #e5e7eb;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .progress-indicator__track {
+    background-color: #374151;
+  }
+  
+  .progress-indicator__text {
+    color: #9ca3af;
+  }
+  
+  .progress-indicator__count {
+    color: #f3f4f6;
+  }
+  
+  .progress-indicator__percentage {
+    color: #9ca3af;
+  }
+  
+  .progress-indicator__circle-text {
+    color: #f3f4f6;
+  }
+  
+  .progress-indicator__ring-inner {
+    background-color: #1f2937;
+  }
+  
+  .progress-indicator__ring-text {
+    color: #f3f4f6;
+  }
+  
+  .progress-indicator__circle-track {
+    stroke: #4b5563;
+  }
+}
+
+/* Accessibility */
+.progress-indicator[role="progressbar"] {
+  outline: none;
+}
+
+.progress-indicator:focus-visible {
+  outline: 2px solid #646cff;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .progress-indicator__text {
+    font-size: 0.625rem;
+  }
+  
+  .progress-indicator--large .progress-indicator__text {
+    font-size: 0.75rem;
+  }
+}

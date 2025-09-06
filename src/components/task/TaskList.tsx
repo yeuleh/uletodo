@@ -1,7 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { Task, TaskFilter, TaskSortOption } from '@/types';
 import { TaskItem } from './TaskItem';
 import { Button } from '@/components/common';
+import { VirtualScrollList } from '@/components/common/VirtualScrollList';
 import './TaskList.css';
 
 export interface TaskListProps {
@@ -17,6 +18,8 @@ export interface TaskListProps {
   loading?: boolean;
   selectedTaskId?: string;
   showCompleted?: boolean;
+  useVirtualScrolling?: boolean;
+  containerHeight?: number;
 }
 
 export const TaskList: React.FC<TaskListProps> = ({
@@ -32,11 +35,30 @@ export const TaskList: React.FC<TaskListProps> = ({
   loading = false,
   selectedTaskId,
   showCompleted = true,
+  useVirtualScrolling = false,
+  containerHeight = 600,
 }) => {
   const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set());
   const [bulkActionMode, setBulkActionMode] = useState(false);
+  const [expandedTasks, setExpandedTasks] = useState<Set<string>>(new Set());
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [actualContainerHeight, setActualContainerHeight] = useState(containerHeight);
 
-  // Build task hierarchy
+  // Measure container height for virtual scrolling
+  useEffect(() => {
+    if (useVirtualScrolling && containerRef.current) {
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          setActualContainerHeight(entry.contentRect.height);
+        }
+      });
+      
+      resizeObserver.observe(containerRef.current);
+      return () => resizeObserver.disconnect();
+    }
+  }, [useVirtualScrolling]);
+
+  // Build task hierarchy with expand/collapse support
   const taskHierarchy = useMemo(() => {
     const taskMap = new Map<string, Task>();
     const rootTasks: Task[] = [];
@@ -55,10 +77,15 @@ export const TaskList: React.FC<TaskListProps> = ({
       }
     });
 
-    // Recursive function to build hierarchy
-    const buildHierarchy = (task: Task, level: number = 0): Array<{ task: Task; level: number }> => {
-      const result = [{ task, level }];
+    // Recursive function to build hierarchy with expand/collapse support
+    const buildHierarchy = (task: Task, level: number = 0): Array<{ 
+      task: Task; 
+      level: number; 
+      subtasks: Task[];
+      isExpanded: boolean;
+    }> => {
       const children = childTasks.get(task.id) || [];
+      const isExpanded = expandedTasks.has(task.id);
       
       // Sort children by the same criteria as root tasks
       const sortedChildren = [...children].sort((a, b) => {
@@ -87,9 +114,14 @@ export const TaskList: React.FC<TaskListProps> = ({
         }
       });
 
-      sortedChildren.forEach(child => {
-        result.push(...buildHierarchy(child, level + 1));
-      });
+      const result = [{ task, level, subtasks: sortedChildren, isExpanded }];
+
+      // Only include children if parent is expanded
+      if (isExpanded) {
+        sortedChildren.forEach(child => {
+          result.push(...buildHierarchy(child, level + 1));
+        });
+      }
 
       return result;
     };
@@ -122,13 +154,18 @@ export const TaskList: React.FC<TaskListProps> = ({
     });
 
     // Build complete hierarchy
-    const hierarchy: Array<{ task: Task; level: number }> = [];
+    const hierarchy: Array<{ 
+      task: Task; 
+      level: number; 
+      subtasks: Task[];
+      isExpanded: boolean;
+    }> = [];
     sortedRootTasks.forEach(task => {
       hierarchy.push(...buildHierarchy(task));
     });
 
     return hierarchy;
-  }, [tasks, sortBy]);
+  }, [tasks, sortBy, expandedTasks]);
 
   // Filter tasks based on completion status and other filters
   const filteredHierarchy = useMemo(() => {
@@ -225,6 +262,29 @@ export const TaskList: React.FC<TaskListProps> = ({
     }
   };
 
+  const handleExpandToggle = (taskId: string, expanded: boolean) => {
+    setExpandedTasks(prev => {
+      const newSet = new Set(prev);
+      if (expanded) {
+        newSet.add(taskId);
+      } else {
+        newSet.delete(taskId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleExpandAll = () => {
+    const allParentTasks = tasks.filter(task => 
+      tasks.some(t => t.parentId === task.id)
+    );
+    setExpandedTasks(new Set(allParentTasks.map(t => t.id)));
+  };
+
+  const handleCollapseAll = () => {
+    setExpandedTasks(new Set());
+  };
+
   if (loading) {
     return (
       <div className="task-list task-list--loading">
@@ -314,6 +374,22 @@ export const TaskList: React.FC<TaskListProps> = ({
           <Button
             variant="ghost"
             size="small"
+            onClick={handleExpandAll}
+            title="Expand all parent tasks"
+          >
+            Expand All
+          </Button>
+          <Button
+            variant="ghost"
+            size="small"
+            onClick={handleCollapseAll}
+            title="Collapse all parent tasks"
+          >
+            Collapse All
+          </Button>
+          <Button
+            variant="ghost"
+            size="small"
             onClick={handleBulkToggle}
           >
             {bulkActionMode ? 'Cancel' : 'Select'}
@@ -322,20 +398,64 @@ export const TaskList: React.FC<TaskListProps> = ({
       </div>
 
       {/* Task items */}
-      <div className="task-list__items">
-        {filteredHierarchy.map(({ task, level }) => (
-          <TaskItem
-            key={task.id}
-            task={task}
-            level={level}
-            onToggle={onTaskToggle}
-            onEdit={onTaskEdit}
-            onDelete={onTaskDelete}
-            onAddSubtask={onAddSubtask}
-            onSelect={handleTaskSelect}
-            isSelected={bulkActionMode ? selectedTasks.has(task.id) : task.id === selectedTaskId}
+      <div 
+        ref={containerRef}
+        className={`task-list__items ${useVirtualScrolling ? 'task-list__items--virtual' : ''}`}
+        style={useVirtualScrolling ? { height: actualContainerHeight } : undefined}
+      >
+        {useVirtualScrolling && filteredHierarchy.length > 100 ? (
+          <VirtualScrollList
+            items={filteredHierarchy.map(({ task, level, subtasks, isExpanded }) => ({
+              id: task.id,
+              task,
+              level,
+              subtasks,
+              isExpanded,
+              height: 80 + (level * 20) // Estimate height based on nesting level
+            }))}
+            containerHeight={actualContainerHeight}
+            itemHeight={80}
+            renderItem={(item, _index, style) => (
+              <div style={style}>
+                <TaskItem
+                  key={item.task.id}
+                  task={item.task}
+                  level={item.level}
+                  onToggle={onTaskToggle}
+                  onEdit={onTaskEdit}
+                  onDelete={onTaskDelete}
+                  onAddSubtask={onAddSubtask}
+                  onSelect={handleTaskSelect}
+                  isSelected={bulkActionMode ? selectedTasks.has(item.task.id) : item.task.id === selectedTaskId}
+                  subtasks={item.subtasks}
+                  onExpandToggle={handleExpandToggle}
+                  isExpanded={item.isExpanded}
+                  showProgress={true}
+                />
+              </div>
+            )}
+            overscan={5}
+            className="task-list__virtual-scroll"
           />
-        ))}
+        ) : (
+          filteredHierarchy.map(({ task, level, subtasks, isExpanded }) => (
+            <TaskItem
+              key={task.id}
+              task={task}
+              level={level}
+              onToggle={onTaskToggle}
+              onEdit={onTaskEdit}
+              onDelete={onTaskDelete}
+              onAddSubtask={onAddSubtask}
+              onSelect={handleTaskSelect}
+              isSelected={bulkActionMode ? selectedTasks.has(task.id) : task.id === selectedTaskId}
+              subtasks={subtasks}
+              onExpandToggle={handleExpandToggle}
+              isExpanded={isExpanded}
+              showProgress={true}
+            />
+          ))
+        )}
       </div>
     </div>
   );

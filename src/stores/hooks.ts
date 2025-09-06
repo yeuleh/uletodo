@@ -50,24 +50,41 @@ export const useTaskActions = () => {
 };
 
 export const useTaskData = () => {
-  return useTaskStore((state) => ({
-    tasks: state.getFilteredTasks(),
-    allTasks: state.tasks,
-    selectedTask: state.selectedTask,
-    loading: state.loading,
-    creating: state.creating,
-    updating: state.updating,
-    deleting: state.deleting,
-    error: state.error,
-    filter: state.filter,
-    sortBy: state.sortBy,
-    showCompleted: state.showCompleted,
-    completedCount: state.getCompletedTasksCount(),
-    totalCount: state.getTotalTasksCount(),
-    savedFilters: state.savedFilters,
-    activeFilterId: state.activeFilterId,
-    filterStatistics: state.filterStatistics
-  }));
+  const tasks = useTaskStore((state) => state.getFilteredTasks());
+  const allTasks = useTaskStore((state) => state.tasks);
+  const selectedTask = useTaskStore((state) => state.selectedTask);
+  const loading = useTaskStore((state) => state.loading);
+  const creating = useTaskStore((state) => state.creating);
+  const updating = useTaskStore((state) => state.updating);
+  const deleting = useTaskStore((state) => state.deleting);
+  const error = useTaskStore((state) => state.error);
+  const filter = useTaskStore((state) => state.filter);
+  const sortBy = useTaskStore((state) => state.sortBy);
+  const showCompleted = useTaskStore((state) => state.showCompleted);
+  const completedCount = useTaskStore((state) => state.getCompletedTasksCount());
+  const totalCount = useTaskStore((state) => state.getTotalTasksCount());
+  const savedFilters = useTaskStore((state) => state.savedFilters);
+  const activeFilterId = useTaskStore((state) => state.activeFilterId);
+  const filterStatistics = useTaskStore((state) => state.filterStatistics);
+
+  return {
+    tasks,
+    allTasks,
+    selectedTask,
+    loading,
+    creating,
+    updating,
+    deleting,
+    error,
+    filter,
+    sortBy,
+    showCompleted,
+    completedCount,
+    totalCount,
+    savedFilters,
+    activeFilterId,
+    filterStatistics
+  };
 };
 
 export const useTaskSelectors = () => {
@@ -103,16 +120,25 @@ export const useTagActions = () => {
 };
 
 export const useTagData = () => {
-  return useTagStore((state) => ({
-    tags: state.tags,
-    suggestions: state.suggestions,
-    loading: state.loading,
-    creating: state.creating,
-    deleting: state.deleting,
-    error: state.error,
-    autocompleteQuery: state.autocompleteQuery,
-    showingSuggestions: state.showingSuggestions
-  }));
+  const tags = useTagStore((state) => state.tags);
+  const suggestions = useTagStore((state) => state.suggestions);
+  const loading = useTagStore((state) => state.loading);
+  const creating = useTagStore((state) => state.creating);
+  const deleting = useTagStore((state) => state.deleting);
+  const error = useTagStore((state) => state.error);
+  const autocompleteQuery = useTagStore((state) => state.autocompleteQuery);
+  const showingSuggestions = useTagStore((state) => state.showingSuggestions);
+
+  return {
+    tags,
+    suggestions,
+    loading,
+    creating,
+    deleting,
+    error,
+    autocompleteQuery,
+    showingSuggestions
+  };
 };
 
 export const useTagSelectors = () => {
@@ -132,10 +158,13 @@ export const useModalActions = () => {
 };
 
 export const useModalState = () => {
-  return useUIStore((state) => ({
-    modals: state.modals,
-    isAnyModalOpen: state.isAnyModalOpen()
-  }));
+  const modals = useUIStore((state) => state.modals);
+  const isAnyModalOpen = useUIStore((state) => state.isAnyModalOpen());
+
+  return {
+    modals,
+    isAnyModalOpen
+  };
 };
 
 export const useSelectionActions = () => {
@@ -157,12 +186,17 @@ export const useSelectionActions = () => {
 };
 
 export const useSelectionState = () => {
-  return useUIStore((state) => ({
-    selectedTaskIds: state.selection.selectedTaskIds,
-    lastSelectedTaskId: state.selection.lastSelectedTaskId,
-    selectionMode: state.selection.selectionMode,
-    selectedCount: state.getSelectedTaskCount()
-  }));
+  const selectedTaskIds = useUIStore((state) => state.selection.selectedTaskIds);
+  const lastSelectedTaskId = useUIStore((state) => state.selection.lastSelectedTaskId);
+  const selectionMode = useUIStore((state) => state.selection.selectionMode);
+  const selectedCount = useUIStore((state) => state.getSelectedTaskCount());
+
+  return {
+    selectedTaskIds,
+    lastSelectedTaskId,
+    selectionMode,
+    selectedCount
+  };
 };
 
 export const useViewActions = () => {

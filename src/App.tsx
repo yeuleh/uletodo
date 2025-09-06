@@ -1,14 +1,19 @@
 
+
+import { TaskManager } from './pages';
+import { ErrorBoundary, NotificationSystem } from './components/common';
+import { OfflineIndicator } from './hooks/useOfflineSupport';
 import "./App.css";
-import { ComponentPreview } from "./components/ComponentPreview";
-import { AdvancedFilteringDemo } from "./components/demo/AdvancedFilteringDemo";
 
 function App() {
   return (
-    <div className="app">
-      <ComponentPreview />
-      <AdvancedFilteringDemo />
-    </div>
+    <ErrorBoundary>
+      <div className="app">
+        <OfflineIndicator className="app__offline-indicator" />
+        <TaskManager />
+        <NotificationSystem position="top-right" maxNotifications={5} />
+      </div>
+    </ErrorBoundary>
   );
 }
 

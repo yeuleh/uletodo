@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Task, TaskPriority, TaskStatus } from '@/types';
-import { Button } from '@/components/common';
+import { Button, ProgressIndicator, TimeStatusIndicator } from '@/components/common';
+import { TaskService } from '@/services';
+import { TimeUtils } from '@/utils/timeUtils';
 import './TaskItem.css';
 
 export interface TaskItemProps {
@@ -12,6 +14,10 @@ export interface TaskItemProps {
   onAddSubtask: (parentId: string) => void;
   onSelect?: (task: Task) => void;
   isSelected?: boolean;
+  subtasks?: Task[];
+  onExpandToggle?: (taskId: string, expanded: boolean) => void;
+  isExpanded?: boolean;
+  showProgress?: boolean;
 }
 
 export const TaskItem: React.FC<TaskItemProps> = ({
@@ -23,12 +29,39 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   onAddSubtask,
   onSelect,
   isSelected = false,
+  subtasks = [],
+  onExpandToggle,
+  isExpanded = false,
+  showProgress = true,
 }) => {
+  const [progress, setProgress] = useState<number>(task.progress || 0);
+  const [loadingProgress, setLoadingProgress] = useState(false);
   const isCompleted = task.status === TaskStatus.COMPLETED;
-  const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && !isCompleted;
-  const isDueSoon = task.dueDate && 
-    new Date(task.dueDate).getTime() - new Date().getTime() < 24 * 60 * 60 * 1000 && 
-    !isCompleted;
+  const timeStatus = TimeUtils.getTaskTimeStatus(task);
+  const isOverdue = timeStatus === 'overdue';
+  const isDueSoon = timeStatus === 'due-soon';
+  
+  const hasSubtasks = subtasks.length > 0;
+  const isParentTask = hasSubtasks || task.progress !== undefined;
+
+  // Calculate progress from subtasks if this is a parent task
+  useEffect(() => {
+    if (isParentTask && showProgress) {
+      const calculateProgress = async () => {
+        setLoadingProgress(true);
+        try {
+          const calculatedProgress = await TaskService.calculateTaskProgress(task.id);
+          setProgress(calculatedProgress);
+        } catch (error) {
+          console.error('Failed to calculate progress:', error);
+        } finally {
+          setLoadingProgress(false);
+        }
+      };
+
+      calculateProgress();
+    }
+  }, [task.id, isParentTask, showProgress, subtasks]);
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -54,6 +87,11 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     onSelect?.(task);
   };
 
+  const handleExpandToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onExpandToggle?.(task.id, !isExpanded);
+  };
+
   const getPriorityColor = (priority: TaskPriority): string => {
     switch (priority) {
       case TaskPriority.HIGH:
@@ -67,39 +105,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     }
   };
 
-  const formatDueDate = (date: Date): string => {
-    const now = new Date();
-    const dueDate = new Date(date);
-    const diffTime = dueDate.getTime() - now.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) {
-      return 'Today';
-    } else if (diffDays === 1) {
-      return 'Tomorrow';
-    } else if (diffDays === -1) {
-      return 'Yesterday';
-    } else if (diffDays < 0) {
-      return `${Math.abs(diffDays)} days ago`;
-    } else if (diffDays <= 7) {
-      return `${diffDays} days`;
-    } else {
-      return dueDate.toLocaleDateString();
-    }
-  };
-
-  const formatDuration = (minutes: number): string => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    
-    if (hours === 0) {
-      return `${mins}m`;
-    } else if (mins === 0) {
-      return `${hours}h`;
-    } else {
-      return `${hours}h ${mins}m`;
-    }
-  };
 
   const baseClass = 'task-item';
   const completedClass = isCompleted ? 'task-item--completed' : '';
@@ -123,11 +129,36 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         style={{ backgroundColor: getPriorityColor(task.priority) }}
       />
 
+      {/* Expand/collapse button for parent tasks */}
+      {hasSubtasks && (
+        <button
+          className="task-item__expand"
+          onClick={handleExpandToggle}
+          aria-label={isExpanded ? 'Collapse subtasks' : 'Expand subtasks'}
+        >
+          <svg 
+            width="12" 
+            height="12" 
+            viewBox="0 0 12 12" 
+            fill="none"
+            className={`task-item__expand-icon ${isExpanded ? 'task-item__expand-icon--expanded' : ''}`}
+          >
+            <path
+              d="M4 6L8 6M6 4L6 8"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
+          </svg>
+        </button>
+      )}
+
       {/* Completion checkbox */}
       <button
         className="task-item__checkbox"
         onClick={handleToggle}
         aria-label={isCompleted ? 'Mark as incomplete' : 'Mark as complete'}
+        style={{ marginLeft: hasSubtasks ? '0' : '1.5rem' }}
       >
         <div className={`task-item__checkbox-inner ${isCompleted ? 'task-item__checkbox-inner--checked' : ''}`}>
           {isCompleted && (
@@ -174,28 +205,42 @@ export const TaskItem: React.FC<TaskItemProps> = ({
           {/* Due date and duration */}
           <div className="task-item__info">
             {task.dueDate && (
-              <span className={`task-item__due-date ${isOverdue ? 'task-item__due-date--overdue' : isDueSoon ? 'task-item__due-date--due-soon' : ''}`}>
-                📅 {formatDueDate(task.dueDate)}
-              </span>
+              <div className="task-item__due-date-container">
+                <span className="task-item__due-date">
+                  📅 {TimeUtils.formatDate(task.dueDate)}
+                </span>
+                <TimeStatusIndicator task={task} size="small" />
+              </div>
             )}
             {task.estimatedDuration && (
               <span className="task-item__duration">
-                ⏱️ {formatDuration(task.estimatedDuration)}
+                ⏱️ {TimeUtils.formatDuration(task.estimatedDuration)}
+              </span>
+            )}
+            {task.startTime && task.estimatedDuration && (
+              <span className="task-item__time-range">
+                🕐 {TimeUtils.formatTime(task.startTime)} - {TimeUtils.formatTime(TimeUtils.calculateEndTime(task.startTime, task.estimatedDuration))}
               </span>
             )}
           </div>
         </div>
 
-        {/* Progress bar for parent tasks */}
-        {task.progress !== undefined && (
+        {/* Progress indicator for parent tasks */}
+        {isParentTask && showProgress && (
           <div className="task-item__progress">
-            <div className="task-item__progress-bar">
-              <div 
-                className="task-item__progress-fill"
-                style={{ width: `${task.progress}%` }}
-              />
-            </div>
-            <span className="task-item__progress-text">{task.progress}%</span>
+            <ProgressIndicator
+              progress={progress}
+              total={subtasks.length}
+              completed={subtasks.filter(s => s.status === TaskStatus.COMPLETED).length}
+              size="small"
+              variant="bar"
+              showText={!loadingProgress}
+              showCount={hasSubtasks}
+              animated={loadingProgress}
+            />
+            {loadingProgress && (
+              <span className="task-item__progress-loading">Calculating...</span>
+            )}
           </div>
         )}
       </div>

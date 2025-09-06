@@ -14,6 +14,7 @@ import type {
   FilterStatistics, 
   SavedFilter
 } from '@/types/Task.types';
+import { TimeUtils } from '@/utils/timeUtils';
 
 export class FilterService {
   private static readonly STORAGE_KEY = 'uletodo_saved_filters';
@@ -89,6 +90,94 @@ export class FilterService {
   }
 
   /**
+   * Apply time-based filtering with smart presets
+   */
+  static applyTimeBasedFilter(tasks: Task[], timeFilter: 'today' | 'tomorrow' | 'this-week' | 'overdue' | 'due-soon' | 'scheduled'): Task[] {
+    switch (timeFilter) {
+      case 'today':
+        return TimeUtils.getTasksDueToday(tasks);
+      
+      case 'tomorrow':
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const startOfTomorrow = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate());
+        const endOfTomorrow = new Date(startOfTomorrow.getTime() + 24 * 60 * 60 * 1000 - 1);
+        
+        return tasks.filter(task => {
+          if (!task.dueDate || task.status === TaskStatus.COMPLETED) return false;
+          return task.dueDate >= startOfTomorrow && task.dueDate <= endOfTomorrow;
+        });
+      
+      case 'this-week':
+        return TimeUtils.getTasksDueThisWeek(tasks);
+      
+      case 'overdue':
+        return TimeUtils.getOverdueTasks(tasks);
+      
+      case 'due-soon':
+        return tasks.filter(task => TimeUtils.isTaskDueSoon(task));
+      
+      case 'scheduled':
+        return tasks.filter(task => 
+          task.startTime && 
+          task.estimatedDuration && 
+          task.status !== TaskStatus.COMPLETED
+        );
+      
+      default:
+        return tasks;
+    }
+  }
+
+  /**
+   * Sort tasks by time-based criteria
+   */
+  static sortTasksByTime(tasks: Task[], sortBy: 'due-date-asc' | 'due-date-desc' | 'start-time-asc' | 'start-time-desc' | 'duration-asc' | 'duration-desc'): Task[] {
+    switch (sortBy) {
+      case 'due-date-asc':
+        return TimeUtils.sortTasksByDueDate(tasks, true);
+      
+      case 'due-date-desc':
+        return TimeUtils.sortTasksByDueDate(tasks, false);
+      
+      case 'start-time-asc':
+        return [...tasks].sort((a, b) => {
+          if (!a.startTime && !b.startTime) return 0;
+          if (!a.startTime) return 1;
+          if (!b.startTime) return -1;
+          return a.startTime.getTime() - b.startTime.getTime();
+        });
+      
+      case 'start-time-desc':
+        return [...tasks].sort((a, b) => {
+          if (!a.startTime && !b.startTime) return 0;
+          if (!a.startTime) return 1;
+          if (!b.startTime) return -1;
+          return b.startTime.getTime() - a.startTime.getTime();
+        });
+      
+      case 'duration-asc':
+        return [...tasks].sort((a, b) => {
+          if (!a.estimatedDuration && !b.estimatedDuration) return 0;
+          if (!a.estimatedDuration) return 1;
+          if (!b.estimatedDuration) return -1;
+          return a.estimatedDuration - b.estimatedDuration;
+        });
+      
+      case 'duration-desc':
+        return [...tasks].sort((a, b) => {
+          if (!a.estimatedDuration && !b.estimatedDuration) return 0;
+          if (!a.estimatedDuration) return 1;
+          if (!b.estimatedDuration) return -1;
+          return b.estimatedDuration - a.estimatedDuration;
+        });
+      
+      default:
+        return tasks;
+    }
+  }
+
+  /**
    * Calculate comprehensive filter statistics
    */
   static calculateStatistics(allTasks: Task[], filteredTasks: Task[]): FilterStatistics {
@@ -106,23 +195,9 @@ export class FilterService {
     const completedTasks = filteredTasks.filter(task => task.status === TaskStatus.COMPLETED).length;
     const pendingTasks = filteredTasks.filter(task => task.status !== TaskStatus.COMPLETED).length;
     
-    const overdueTasks = filteredTasks.filter(task => 
-      task.dueDate && 
-      new Date(task.dueDate) < today && 
-      task.status !== TaskStatus.COMPLETED
-    ).length;
-
-    const todayTasks = filteredTasks.filter(task =>
-      task.dueDate &&
-      new Date(task.dueDate) >= today &&
-      new Date(task.dueDate) < tomorrow
-    ).length;
-
-    const thisWeekTasks = filteredTasks.filter(task =>
-      task.dueDate &&
-      new Date(task.dueDate) >= startOfWeek &&
-      new Date(task.dueDate) < endOfWeek
-    ).length;
+    const overdueTasks = TimeUtils.getOverdueTasks(filteredTasks).length;
+    const todayTasks = TimeUtils.getTasksDueToday(filteredTasks).length;
+    const thisWeekTasks = TimeUtils.getTasksDueThisWeek(filteredTasks).length;
 
     // Count by priority
     const byPriority: Record<TaskPriority, number> = {
@@ -194,7 +269,7 @@ export class FilterService {
       },
       {
         id: 'today',
-        name: 'Today',
+        name: 'Due Today',
         filter: {
           dueDateFrom: today,
           dueDateTo: tomorrow,
@@ -205,8 +280,20 @@ export class FilterService {
         usageCount: 0
       },
       {
+        id: 'tomorrow',
+        name: 'Due Tomorrow',
+        filter: {
+          dueDateFrom: tomorrow,
+          dueDateTo: new Date(tomorrow.getTime() + 24 * 60 * 60 * 1000),
+          status: [TaskStatus.TODO, TaskStatus.IN_PROGRESS]
+        },
+        isBuiltIn: true,
+        createdAt: new Date(),
+        usageCount: 0
+      },
+      {
         id: 'this-week',
-        name: 'This Week',
+        name: 'Due This Week',
         filter: {
           dueDateFrom: startOfWeek,
           dueDateTo: endOfWeek,
@@ -221,6 +308,28 @@ export class FilterService {
         name: 'Overdue',
         filter: {
           dueDateTo: today,
+          status: [TaskStatus.TODO, TaskStatus.IN_PROGRESS]
+        },
+        isBuiltIn: true,
+        createdAt: new Date(),
+        usageCount: 0
+      },
+      {
+        id: 'due-soon',
+        name: 'Due Soon (24h)',
+        filter: {
+          dueDateFrom: today,
+          dueDateTo: new Date(today.getTime() + 24 * 60 * 60 * 1000),
+          status: [TaskStatus.TODO, TaskStatus.IN_PROGRESS]
+        },
+        isBuiltIn: true,
+        createdAt: new Date(),
+        usageCount: 0
+      },
+      {
+        id: 'scheduled',
+        name: 'Scheduled Tasks',
+        filter: {
           status: [TaskStatus.TODO, TaskStatus.IN_PROGRESS]
         },
         isBuiltIn: true,

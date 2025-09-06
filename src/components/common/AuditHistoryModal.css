@@ -1,0 +1,33 @@
+/**
+ * Audit history modal styles
+ */
+
+.audit-history-modal .modal__content {
+  max-width: 800px;
+  width: 90vw;
+  max-height: 80vh;
+}
+
+.audit-history-modal__content {
+  padding: 0;
+  height: 60vh;
+  overflow: hidden;
+}
+
+.audit-history-modal__timeline {
+  height: 100%;
+  border: none;
+  border-radius: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .audit-history-modal .modal__content {
+    width: 95vw;
+    max-height: 90vh;
+  }
+  
+  .audit-history-modal__content {
+    height: 70vh;
+  }
+}

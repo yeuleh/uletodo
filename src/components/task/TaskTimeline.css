@@ -1,0 +1,477 @@
+.task-timeline {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.task-timeline__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+}
+
+.task-timeline__navigation {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.task-timeline__nav-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: white;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1.125rem;
+}
+
+.task-timeline__nav-button:hover {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.task-timeline__date-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.task-timeline__date-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: #111827;
+}
+
+.task-timeline__task-count {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.task-timeline__controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.task-timeline__today-button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: white;
+  color: #374151;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.task-timeline__today-button:hover {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.task-timeline__content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.task-timeline__content--day {
+  display: flex;
+  justify-content: center;
+}
+
+.task-timeline__content--week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background-color: #e5e7eb;
+}
+
+.task-timeline__day {
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  min-height: 100%;
+}
+
+.task-timeline__day--today {
+  background-color: #fef3c7;
+}
+
+.task-timeline__day--selected {
+  background-color: #dbeafe;
+}
+
+.task-timeline__day-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+}
+
+.task-timeline__day-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0;
+  color: #374151;
+}
+
+.task-timeline__day-date {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.task-timeline__slots {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.task-timeline__slot {
+  display: flex;
+  min-height: 60px;
+  border-bottom: 1px solid #f3f4f6;
+  position: relative;
+}
+
+.task-timeline__slot--has-tasks {
+  background-color: #fafafa;
+}
+
+.task-timeline__time-label {
+  width: 60px;
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  background-color: #f9fafb;
+}
+
+.task-timeline__slot-content {
+  flex: 1;
+  padding: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  position: relative;
+}
+
+.task-timeline__task {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem;
+  border-radius: 6px;
+  background-color: #3b82f6;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-left: 4px solid #1d4ed8;
+  min-height: 40px;
+  overflow: hidden;
+}
+
+.task-timeline__task:hover {
+  background-color: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.task-timeline__task--completed {
+  background-color: #6b7280;
+  border-left-color: #4b5563;
+  opacity: 0.8;
+}
+
+.task-timeline__task--completed:hover {
+  background-color: #4b5563;
+}
+
+.task-timeline__task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.25rem;
+}
+
+.task-timeline__task-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.task-timeline__task-checkbox-inner {
+  width: 0.875rem;
+  height: 0.875rem;
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  background-color: transparent;
+}
+
+.task-timeline__task-checkbox:hover .task-timeline__task-checkbox-inner {
+  border-color: white;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.task-timeline__task-checkbox-inner--checked {
+  background-color: white;
+  border-color: white;
+  color: #3b82f6;
+}
+
+.task-timeline__task-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-height: 0;
+}
+
+.task-timeline__task-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.task-timeline__task-time {
+  font-size: 0.75rem;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+.task-timeline__task-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: auto;
+}
+
+.task-timeline__task-tag {
+  display: inline-block;
+  padding: 0.125rem 0.375rem;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  font-size: 0.625rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.task-timeline__task-tag-more {
+  display: inline-block;
+  padding: 0.125rem 0.375rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  font-size: 0.625rem;
+  font-weight: 500;
+  font-style: italic;
+}
+
+.task-timeline__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  color: #6b7280;
+}
+
+.task-timeline__empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.task-timeline__empty-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: #374151;
+}
+
+.task-timeline__empty-description {
+  font-size: 0.875rem;
+  margin: 0;
+  max-width: 24rem;
+  line-height: 1.5;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .task-timeline {
+    background-color: #1f2937;
+  }
+
+  .task-timeline__header {
+    border-bottom-color: #374151;
+    background-color: #374151;
+  }
+
+  .task-timeline__nav-button,
+  .task-timeline__today-button {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: #f3f4f6;
+  }
+
+  .task-timeline__nav-button:hover,
+  .task-timeline__today-button:hover {
+    background-color: #4b5563;
+    border-color: #6b7280;
+  }
+
+  .task-timeline__date-title {
+    color: #f9fafb;
+  }
+
+  .task-timeline__task-count {
+    color: #d1d5db;
+  }
+
+  .task-timeline__day {
+    background-color: #1f2937;
+  }
+
+  .task-timeline__day--today {
+    background-color: #451a03;
+  }
+
+  .task-timeline__day--selected {
+    background-color: #1e3a8a;
+  }
+
+  .task-timeline__day-header {
+    border-bottom-color: #374151;
+    background-color: #374151;
+  }
+
+  .task-timeline__day-title {
+    color: #f3f4f6;
+  }
+
+  .task-timeline__day-date {
+    color: #f9fafb;
+  }
+
+  .task-timeline__slot {
+    border-bottom-color: #374151;
+  }
+
+  .task-timeline__slot--has-tasks {
+    background-color: #111827;
+  }
+
+  .task-timeline__time-label {
+    color: #9ca3af;
+    border-right-color: #374151;
+    background-color: #374151;
+  }
+
+  .task-timeline__empty-title {
+    color: #f3f4f6;
+  }
+
+  .task-timeline__empty-description {
+    color: #9ca3af;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .task-timeline__header {
+    padding: 0.75rem;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .task-timeline__navigation {
+    gap: 0.75rem;
+  }
+
+  .task-timeline__date-title {
+    font-size: 1.125rem;
+  }
+
+  .task-timeline__content--week {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .task-timeline__day-header {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0.5rem;
+  }
+
+  .task-timeline__time-label {
+    width: 50px;
+    font-size: 0.625rem;
+  }
+
+  .task-timeline__task {
+    padding: 0.375rem;
+  }
+
+  .task-timeline__task-title {
+    font-size: 0.8125rem;
+  }
+
+  .task-timeline__task-time {
+    font-size: 0.6875rem;
+  }
+}
+
+/* Print styles */
+@media print {
+  .task-timeline__header {
+    background-color: white !important;
+    border-bottom: 2px solid #000;
+  }
+
+  .task-timeline__nav-button,
+  .task-timeline__today-button {
+    display: none;
+  }
+
+  .task-timeline__task {
+    background-color: #f3f4f6 !important;
+    color: #000 !important;
+    border: 1px solid #d1d5db !important;
+  }
+}

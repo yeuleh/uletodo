@@ -100,29 +100,74 @@ async fn create_indexes(pool: &SqlitePool) -> Result<(), sqlx::Error> {
         "CREATE INDEX IF NOT EXISTS idx_tasks_created_at ON tasks(created_at)",
         "CREATE INDEX IF NOT EXISTS idx_tasks_updated_at ON tasks(updated_at)",
         "CREATE INDEX IF NOT EXISTS idx_tasks_completed_at ON tasks(completed_at)",
+        "CREATE INDEX IF NOT EXISTS idx_tasks_start_time ON tasks(start_time)",
         
         // Composite indexes for common filter combinations
         "CREATE INDEX IF NOT EXISTS idx_tasks_status_priority ON tasks(status, priority)",
         "CREATE INDEX IF NOT EXISTS idx_tasks_status_due_date ON tasks(status, due_date)",
+        "CREATE INDEX IF NOT EXISTS idx_tasks_status_created_at ON tasks(status, created_at)",
+        "CREATE INDEX IF NOT EXISTS idx_tasks_parent_status ON tasks(parent_id, status)",
+        "CREATE INDEX IF NOT EXISTS idx_tasks_due_priority ON tasks(due_date, priority)",
+        
+        // Full-text search index for task titles and descriptions
+        "CREATE INDEX IF NOT EXISTS idx_tasks_title_fts ON tasks(title COLLATE NOCASE)",
         
         // Tag table indexes
-        "CREATE INDEX IF NOT EXISTS idx_tags_name ON tags(name)",
+        "CREATE INDEX IF NOT EXISTS idx_tags_name ON tags(name COLLATE NOCASE)",
         "CREATE INDEX IF NOT EXISTS idx_tags_created_at ON tags(created_at)",
         
         // Task-Tag junction table indexes
         "CREATE INDEX IF NOT EXISTS idx_task_tags_task_id ON task_tags(task_id)",
         "CREATE INDEX IF NOT EXISTS idx_task_tags_tag_id ON task_tags(tag_id)",
         
-        // Audit logs indexes for history queries
+        // Audit logs indexes for history queries and pagination
         "CREATE INDEX IF NOT EXISTS idx_audit_logs_task_id ON audit_logs(task_id)",
-        "CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON audit_logs(timestamp)",
+        "CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON audit_logs(timestamp DESC)",
         "CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON audit_logs(action)",
-        "CREATE INDEX IF NOT EXISTS idx_audit_logs_task_timestamp ON audit_logs(task_id, timestamp)",
+        "CREATE INDEX IF NOT EXISTS idx_audit_logs_task_timestamp ON audit_logs(task_id, timestamp DESC)",
+        "CREATE INDEX IF NOT EXISTS idx_audit_logs_action_timestamp ON audit_logs(action, timestamp DESC)",
     ];
 
     for index_sql in indexes {
         sqlx::query(index_sql).execute(pool).await?;
     }
+
+    // Create additional performance optimizations
+    create_performance_optimizations(pool).await?;
+
+    Ok(())
+}
+
+async fn create_performance_optimizations(pool: &SqlitePool) -> Result<(), sqlx::Error> {
+    // Enable WAL mode for better concurrent access
+    sqlx::query("PRAGMA journal_mode = WAL")
+        .execute(pool)
+        .await?;
+
+    // Set synchronous mode to NORMAL for better performance
+    sqlx::query("PRAGMA synchronous = NORMAL")
+        .execute(pool)
+        .await?;
+
+    // Increase cache size for better performance (10MB)
+    sqlx::query("PRAGMA cache_size = -10000")
+        .execute(pool)
+        .await?;
+
+    // Enable foreign key constraints
+    sqlx::query("PRAGMA foreign_keys = ON")
+        .execute(pool)
+        .await?;
+
+    // Set temp store to memory for better performance
+    sqlx::query("PRAGMA temp_store = MEMORY")
+        .execute(pool)
+        .await?;
+
+    // Optimize for read-heavy workloads
+    sqlx::query("PRAGMA optimize")
+        .execute(pool)
+        .await?;
 
     Ok(())
 }

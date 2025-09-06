@@ -10,6 +10,21 @@ use async_trait::async_trait;
 use serde_json::Value;
 use std::sync::Arc;
 use chrono::Utc;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DetailedChangeInfo {
+    pub log_id: String,
+    pub task_id: String,
+    pub action: AuditAction,
+    pub field_name: Option<String>,
+    pub old_value: Option<String>,
+    pub new_value: Option<String>,
+    pub formatted_old_value: Option<String>,
+    pub formatted_new_value: Option<String>,
+    pub description: String,
+    pub timestamp: i64,
+}
 
 #[async_trait]
 pub trait AuditService: Send + Sync {
@@ -21,6 +36,7 @@ pub trait AuditService: Send + Sync {
     async fn get_audit_logs(&self, filter: Option<AuditLogFilter>, limit: Option<i32>, offset: Option<i32>) -> Result<Vec<AuditLogModel>, AuditError>;
     async fn cleanup_old_logs(&self, retention_days: i32) -> Result<usize, AuditError>;
     async fn get_change_summary(&self, task_id: &str) -> Result<String, AuditError>;
+    async fn get_detailed_change_info(&self, log_id: &str) -> Result<Option<DetailedChangeInfo>, AuditError>;
 }
 
 pub struct AuditServiceImpl {
@@ -121,7 +137,9 @@ impl AuditServiceImpl {
                 AuditAction::Deleted => "Task deleted".to_string(),
                 AuditAction::StatusChanged => {
                     if let (Some(old_val), Some(new_val)) = (&log.old_value, &log.new_value) {
-                        format!("Status changed from {} to {}", old_val, new_val)
+                        let old_status = Self::format_status_display(old_val);
+                        let new_status = Self::format_status_display(new_val);
+                        format!("Status changed from {} to {}", old_status, new_status)
                     } else {
                         "Status changed".to_string()
                     }
@@ -129,19 +147,102 @@ impl AuditServiceImpl {
                 AuditAction::Updated => {
                     if let Some(field) = &log.field_name {
                         match field.as_str() {
-                            "title" => "Title updated".to_string(),
-                            "description" => "Description updated".to_string(),
+                            "title" => {
+                                if let (Some(old_val), Some(new_val)) = (&log.old_value, &log.new_value) {
+                                    format!("Title changed from \"{}\" to \"{}\"", old_val, new_val)
+                                } else {
+                                    "Title updated".to_string()
+                                }
+                            },
+                            "description" => {
+                                if let (Some(old_val), Some(new_val)) = (&log.old_value, &log.new_value) {
+                                    let old_preview = Self::truncate_text(old_val, 50);
+                                    let new_preview = Self::truncate_text(new_val, 50);
+                                    format!("Description changed from \"{}\" to \"{}\"", old_preview, new_preview)
+                                } else {
+                                    "Description updated".to_string()
+                                }
+                            },
                             "priority" => {
                                 if let (Some(old_val), Some(new_val)) = (&log.old_value, &log.new_value) {
-                                    format!("Priority changed from {} to {}", old_val, new_val)
+                                    let old_priority = Self::format_priority_display(old_val);
+                                    let new_priority = Self::format_priority_display(new_val);
+                                    format!("Priority changed from {} to {}", old_priority, new_priority)
                                 } else {
                                     "Priority updated".to_string()
                                 }
                             },
-                            "due_date" => "Due date updated".to_string(),
-                            "estimated_duration" => "Estimated duration updated".to_string(),
-                            "start_time" => "Start time updated".to_string(),
-                            "parent_id" => "Parent task changed".to_string(),
+                            "due_date" => {
+                                if let (Some(old_val), Some(new_val)) = (&log.old_value, &log.new_value) {
+                                    let old_date = Self::format_date_display(old_val);
+                                    let new_date = Self::format_date_display(new_val);
+                                    if old_val.is_empty() {
+                                        format!("Due date set to {}", new_date)
+                                    } else if new_val.is_empty() {
+                                        format!("Due date removed (was {})", old_date)
+                                    } else {
+                                        format!("Due date changed from {} to {}", old_date, new_date)
+                                    }
+                                } else {
+                                    "Due date updated".to_string()
+                                }
+                            },
+                            "estimated_duration" => {
+                                if let (Some(old_val), Some(new_val)) = (&log.old_value, &log.new_value) {
+                                    let old_duration = Self::format_duration_display(old_val);
+                                    let new_duration = Self::format_duration_display(new_val);
+                                    if old_val.is_empty() {
+                                        format!("Estimated duration set to {}", new_duration)
+                                    } else if new_val.is_empty() {
+                                        format!("Estimated duration removed (was {})", old_duration)
+                                    } else {
+                                        format!("Estimated duration changed from {} to {}", old_duration, new_duration)
+                                    }
+                                } else {
+                                    "Estimated duration updated".to_string()
+                                }
+                            },
+                            "start_time" => {
+                                if let (Some(old_val), Some(new_val)) = (&log.old_value, &log.new_value) {
+                                    let old_time = Self::format_datetime_display(old_val);
+                                    let new_time = Self::format_datetime_display(new_val);
+                                    if old_val.is_empty() {
+                                        format!("Start time set to {}", new_time)
+                                    } else if new_val.is_empty() {
+                                        format!("Start time removed (was {})", old_time)
+                                    } else {
+                                        format!("Start time changed from {} to {}", old_time, new_time)
+                                    }
+                                } else {
+                                    "Start time updated".to_string()
+                                }
+                            },
+                            "parent_id" => {
+                                if let (Some(old_val), Some(new_val)) = (&log.old_value, &log.new_value) {
+                                    if old_val.is_empty() {
+                                        "Converted to subtask".to_string()
+                                    } else if new_val.is_empty() {
+                                        "Converted to main task".to_string()
+                                    } else {
+                                        "Parent task changed".to_string()
+                                    }
+                                } else {
+                                    "Parent task changed".to_string()
+                                }
+                            },
+                            "tags" => {
+                                if let (Some(old_val), Some(new_val)) = (&log.old_value, &log.new_value) {
+                                    if old_val.is_empty() {
+                                        format!("Tags added: {}", new_val)
+                                    } else if new_val.is_empty() {
+                                        format!("Tags removed: {}", old_val)
+                                    } else {
+                                        format!("Tags changed from \"{}\" to \"{}\"", old_val, new_val)
+                                    }
+                                } else {
+                                    "Tags updated".to_string()
+                                }
+                            },
                             _ => format!("{} updated", field),
                         }
                     } else {
@@ -153,6 +254,115 @@ impl AuditServiceImpl {
         }
 
         descriptions.join(", ")
+    }
+
+    /// Format status for display
+    fn format_status_display(status: &str) -> String {
+        match status {
+            "todo" => "To Do".to_string(),
+            "in_progress" => "In Progress".to_string(),
+            "completed" => "Completed".to_string(),
+            _ => status.to_string(),
+        }
+    }
+
+    /// Format priority for display
+    fn format_priority_display(priority: &str) -> String {
+        match priority {
+            "none" => "None".to_string(),
+            "low" => "Low".to_string(),
+            "medium" => "Medium".to_string(),
+            "high" => "High".to_string(),
+            _ => priority.to_string(),
+        }
+    }
+
+    /// Format date for display
+    fn format_date_display(date_str: &str) -> String {
+        if date_str.is_empty() {
+            return "None".to_string();
+        }
+        
+        if let Ok(timestamp) = date_str.parse::<i64>() {
+            let datetime = chrono::DateTime::from_timestamp(timestamp, 0);
+            if let Some(dt) = datetime {
+                return dt.format("%Y-%m-%d").to_string();
+            }
+        }
+        
+        date_str.to_string()
+    }
+
+    /// Format datetime for display
+    fn format_datetime_display(datetime_str: &str) -> String {
+        if datetime_str.is_empty() {
+            return "None".to_string();
+        }
+        
+        if let Ok(timestamp) = datetime_str.parse::<i64>() {
+            let datetime = chrono::DateTime::from_timestamp(timestamp, 0);
+            if let Some(dt) = datetime {
+                return dt.format("%Y-%m-%d %H:%M").to_string();
+            }
+        }
+        
+        datetime_str.to_string()
+    }
+
+    /// Format duration for display
+    fn format_duration_display(duration_str: &str) -> String {
+        if duration_str.is_empty() {
+            return "None".to_string();
+        }
+        
+        if let Ok(minutes) = duration_str.parse::<i32>() {
+            if minutes >= 60 {
+                let hours = minutes / 60;
+                let remaining_minutes = minutes % 60;
+                if remaining_minutes == 0 {
+                    format!("{} hour{}", hours, if hours == 1 { "" } else { "s" })
+                } else {
+                    format!("{} hour{} {} minute{}", 
+                        hours, if hours == 1 { "" } else { "s" },
+                        remaining_minutes, if remaining_minutes == 1 { "" } else { "s" })
+                }
+            } else {
+                format!("{} minute{}", minutes, if minutes == 1 { "" } else { "s" })
+            }
+        } else {
+            duration_str.to_string()
+        }
+    }
+
+    /// Truncate text for display
+    fn truncate_text(text: &str, max_length: usize) -> String {
+        if text.len() <= max_length {
+            text.to_string()
+        } else {
+            format!("{}...", &text[..max_length])
+        }
+    }
+
+    /// Format field value for display based on field type
+    fn format_field_value(field_name: &str, value: &str) -> String {
+        match field_name {
+            "status" => Self::format_status_display(value),
+            "priority" => Self::format_priority_display(value),
+            "due_date" => Self::format_date_display(value),
+            "start_time" => Self::format_datetime_display(value),
+            "estimated_duration" => Self::format_duration_display(value),
+            "tags" => Self::format_tags_display(value),
+            _ => value.to_string(),
+        }
+    }
+
+    /// Format tags for display
+    fn format_tags_display(tags_str: &str) -> String {
+        if tags_str.is_empty() {
+            "None".to_string()
+        } else {
+            format!("[{}]", tags_str)
+        }
     }
 }
 
@@ -272,6 +482,56 @@ impl AuditService for AuditServiceImpl {
     async fn get_change_summary(&self, task_id: &str) -> Result<String, AuditError> {
         let logs = self.get_task_history(task_id, None).await?;
         Ok(Self::generate_change_description(&logs))
+    }
+
+    async fn get_detailed_change_info(&self, log_id: &str) -> Result<Option<DetailedChangeInfo>, AuditError> {
+        // Get the specific audit log
+        let filter = AuditLogFilter {
+            task_id: None,
+            action: None,
+            from_date: None,
+            to_date: None,
+        };
+        
+        let all_logs = self.audit_repo.get_logs(filter).await
+            .map_err(|e| AuditError::Database { message: e.to_string() })?;
+        
+        let log = all_logs.into_iter().find(|l| l.id == log_id);
+        
+        if let Some(log) = log {
+            let formatted_old_value = log.old_value.as_ref().map(|v| {
+                if let Some(field) = &log.field_name {
+                    Self::format_field_value(field, v)
+                } else {
+                    v.clone()
+                }
+            });
+            
+            let formatted_new_value = log.new_value.as_ref().map(|v| {
+                if let Some(field) = &log.field_name {
+                    Self::format_field_value(field, v)
+                } else {
+                    v.clone()
+                }
+            });
+            
+            let description = Self::generate_change_description(&[log.clone()]);
+            
+            Ok(Some(DetailedChangeInfo {
+                log_id: log.id,
+                task_id: log.task_id,
+                action: log.action,
+                field_name: log.field_name,
+                old_value: log.old_value,
+                new_value: log.new_value,
+                formatted_old_value,
+                formatted_new_value,
+                description,
+                timestamp: log.timestamp,
+            }))
+        } else {
+            Ok(None)
+        }
     }
 }
 

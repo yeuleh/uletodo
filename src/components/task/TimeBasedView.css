@@ -1,0 +1,272 @@
+.time-based-view {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.time-based-view--empty {
+  justify-content: center;
+  align-items: center;
+  min-height: 20rem;
+}
+
+.time-based-view__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.time-based-view__summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.time-based-view__count {
+  font-weight: 500;
+  color: #374151;
+}
+
+.time-based-view__groups {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.time-based-view__group {
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  background-color: white;
+}
+
+.time-based-view__group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background-color: #f9fafb;
+  border: none;
+  border-left: 4px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.time-based-view__group-header:hover {
+  background-color: #f3f4f6;
+}
+
+.time-based-view__group-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.time-based-view__group-icon {
+  font-size: 1.125rem;
+}
+
+.time-based-view__group-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  color: #374151;
+}
+
+.time-based-view__group-count {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.time-based-view__group-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.time-based-view__group-toggle:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.time-based-view__group-toggle-icon {
+  transition: transform 0.2s ease;
+  color: #6b7280;
+}
+
+.time-based-view__group-toggle-icon--collapsed {
+  transform: rotate(-90deg);
+}
+
+.time-based-view__group-content {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid #e5e7eb;
+}
+
+.time-based-view__group-content .task-item {
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.time-based-view__group-content .task-item:last-child {
+  border-bottom: none;
+}
+
+.time-based-view__group-content .task-item:hover {
+  background-color: #f9fafb;
+}
+
+/* Empty state */
+.time-based-view__empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+  padding: 2rem;
+}
+
+.time-based-view__empty-icon {
+  font-size: 3rem;
+  opacity: 0.5;
+}
+
+.time-based-view__empty-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: #374151;
+}
+
+.time-based-view__empty-description {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+  max-width: 24rem;
+  line-height: 1.5;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .time-based-view__header {
+    border-bottom-color: #374151;
+  }
+
+  .time-based-view__count {
+    color: #f3f4f6;
+  }
+
+  .time-based-view__summary {
+    color: #9ca3af;
+  }
+
+  .time-based-view__group {
+    border-color: #374151;
+    background-color: #1f2937;
+  }
+
+  .time-based-view__group-header {
+    background-color: #374151;
+  }
+
+  .time-based-view__group-header:hover {
+    background-color: #4b5563;
+  }
+
+  .time-based-view__group-title {
+    color: #f3f4f6;
+  }
+
+  .time-based-view__group-count {
+    color: #9ca3af;
+  }
+
+  .time-based-view__group-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .time-based-view__group-toggle-icon {
+    color: #9ca3af;
+  }
+
+  .time-based-view__group-content {
+    border-top-color: #374151;
+  }
+
+  .time-based-view__group-content .task-item {
+    border-bottom-color: #374151;
+  }
+
+  .time-based-view__group-content .task-item:hover {
+    background-color: #374151;
+  }
+
+  .time-based-view__empty-title {
+    color: #f3f4f6;
+  }
+
+  .time-based-view__empty-description {
+    color: #9ca3af;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .time-based-view__group-header {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .time-based-view__group-info {
+    gap: 0.375rem;
+  }
+
+  .time-based-view__group-title {
+    font-size: 0.875rem;
+  }
+
+  .time-based-view__group-count {
+    font-size: 0.75rem;
+  }
+
+  .time-based-view__empty-state {
+    padding: 1.5rem;
+  }
+
+  .time-based-view__empty-icon {
+    font-size: 2.5rem;
+  }
+
+  .time-based-view__empty-title {
+    font-size: 1.125rem;
+  }
+}
+
+/* Animation for smooth expand/collapse */
+.time-based-view__group-content {
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

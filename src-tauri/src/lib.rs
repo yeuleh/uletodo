@@ -19,10 +19,10 @@ pub fn run() {
         )?;
       }
       
-      // Initialize database
-      tauri::async_runtime::block_on(async {
-        database::connection::initialize_database().await
-      })?;
+      // Initialize database (temporarily disabled for development)
+      // tauri::async_runtime::block_on(async {
+      //   database::connection::initialize_database().await
+      // })?;
       
       Ok(())
     })
@@ -35,6 +35,8 @@ pub fn run() {
       commands::tasks::delete_task,
       commands::tasks::toggle_task_status,
       commands::tasks::add_subtask,
+      commands::tasks::get_subtasks,
+      commands::tasks::calculate_task_progress,
       // Tag management commands
       commands::tags::create_tag,
       commands::tags::list_tags,
@@ -44,6 +46,8 @@ pub fn run() {
       // Audit commands
       commands::audit::get_task_history,
       commands::audit::get_audit_logs,
+      commands::audit::get_detailed_change_info,
+      commands::audit::get_change_summary,
       commands::audit::bulk_update_tasks,
       commands::audit::export_data,
       commands::audit::import_data,

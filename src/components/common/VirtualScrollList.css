@@ -1,0 +1,105 @@
+/**
+ * Styles for virtual scrolling component
+ */
+
+.virtual-scroll-container {
+  position: relative;
+  overflow: auto;
+  will-change: scroll-position;
+}
+
+.virtual-scroll-content {
+  position: relative;
+  width: 100%;
+}
+
+.virtual-scroll-item {
+  position: absolute;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Smooth scrolling performance optimizations */
+.virtual-scroll-container {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar styling */
+.virtual-scroll-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.virtual-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.virtual-scroll-container::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+.virtual-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Dark mode scrollbar */
+@media (prefers-color-scheme: dark) {
+  .virtual-scroll-container::-webkit-scrollbar-thumb {
+    background: #4b5563;
+  }
+  
+  .virtual-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+  }
+}
+
+/* Performance optimizations */
+.virtual-scroll-container * {
+  /* Promote to composite layer for better performance */
+  transform: translateZ(0);
+}
+
+/* Loading state */
+.virtual-scroll-container--loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.virtual-scroll-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  color: #6b7280;
+}
+
+.virtual-scroll-loading__spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid #e5e7eb;
+  border-top: 2px solid #646cff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Accessibility improvements */
+.virtual-scroll-container:focus-within {
+  outline: 2px solid #646cff;
+  outline-offset: 2px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .virtual-scroll-container::-webkit-scrollbar {
+    width: 6px;
+  }
+}

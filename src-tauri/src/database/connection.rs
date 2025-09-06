@@ -8,7 +8,10 @@ use std::sync::OnceLock;
 static DB_POOL: OnceLock<SqlitePool> = OnceLock::new();
 
 pub async fn initialize_database() -> Result<(), sqlx::Error> {
-    let database_url = "sqlite:tasks.db";
+    // Use a simple database path in the current directory for development
+    let database_url = "sqlite:./tasks.db";
+    
+    println!("Connecting to database at: ./tasks.db");
     let pool = SqlitePool::connect(database_url).await?;
     
     // Create tables if they don't exist (migrations will be implemented in later tasks)

@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Task, TaskStatus, TaskPriority, AuditLog, AuditAction, CreateTaskInput, UpdateTaskInput } from '@/types';
+import React, { useState } from 'react';
+import { Task, TaskStatus, TaskPriority, CreateTaskInput, UpdateTaskInput } from '@/types';
 import { TaskForm } from './TaskForm';
 import { TaskItem } from './TaskItem';
-import { Button, Modal } from '@/components/common';
-import { AuditService } from '@/services/AuditService';
+import { Button, Modal, AuditLogTimeline, AuditLogSummary } from '@/components/common';
 import { useTaskStore } from '@/stores/taskStore';
 import './TaskDetail.css';
 
@@ -23,32 +22,14 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({
   onAddSubtask,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
-  const [loadingHistory, setLoadingHistory] = useState(false);
+
   const [showHistory, setShowHistory] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   const { getSubtasks, toggleTaskStatus, deleteTask } = useTaskStore();
   const subtasks = getSubtasks(task.id);
 
-  // Load audit history when component mounts or task changes
-  useEffect(() => {
-    if (showHistory) {
-      loadAuditHistory();
-    }
-  }, [task.id, showHistory]);
 
-  const loadAuditHistory = async () => {
-    setLoadingHistory(true);
-    try {
-      const logs = await AuditService.getTaskHistory(task.id);
-      setAuditLogs(logs);
-    } catch (error) {
-      console.error('Failed to load audit history:', error);
-    } finally {
-      setLoadingHistory(false);
-    }
-  };
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -125,38 +106,7 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({
     }
   };
 
-  const getActionDescription = (log: AuditLog): string => {
-    switch (log.action) {
-      case AuditAction.CREATED:
-        return 'Task created';
-      case AuditAction.STATUS_CHANGED:
-        return `Status changed from "${log.oldValue}" to "${log.newValue}"`;
-      case AuditAction.UPDATED:
-        if (log.fieldName) {
-          return `Updated ${log.fieldName}`;
-        }
-        return 'Task updated';
-      case AuditAction.DELETED:
-        return 'Task deleted';
-      default:
-        return 'Unknown action';
-    }
-  };
 
-  const getActionIcon = (action: AuditAction): string => {
-    switch (action) {
-      case AuditAction.CREATED:
-        return '➕';
-      case AuditAction.STATUS_CHANGED:
-        return '✅';
-      case AuditAction.UPDATED:
-        return '✏️';
-      case AuditAction.DELETED:
-        return '🗑️';
-      default:
-        return '📝';
-    }
-  };
 
   const getPriorityColor = (priority: TaskPriority): string => {
     switch (priority) {
@@ -363,50 +313,36 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({
           </div>
         )}
 
-        {/* History */}
+        {/* Change Summary */}
         <div className="task-detail__section">
-          <div className="task-detail__section-header">
-            <h3 className="task-detail__section-title">History</h3>
-            <Button
-              variant="ghost"
-              size="small"
-              onClick={() => setShowHistory(!showHistory)}
-            >
-              {showHistory ? 'Hide History' : 'Show History'}
-            </Button>
-          </div>
-          
-          {showHistory && (
-            <div className="task-detail__history">
-              {loadingHistory ? (
-                <div className="task-detail__history-loading">
-                  <div className="spinner" />
-                  <span>Loading history...</span>
-                </div>
-              ) : auditLogs.length > 0 ? (
-                <div className="task-detail__timeline">
-                  {auditLogs.map(log => (
-                    <div key={log.id} className="task-detail__timeline-item">
-                      <div className="task-detail__timeline-icon">
-                        {getActionIcon(log.action)}
-                      </div>
-                      <div className="task-detail__timeline-content">
-                        <div className="task-detail__timeline-description">
-                          {getActionDescription(log)}
-                        </div>
-                        <div className="task-detail__timeline-timestamp">
-                          {formatTimestamp(log.timestamp)}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="task-detail__no-history">No history available</p>
-              )}
-            </div>
-          )}
+          <h3 className="task-detail__section-title">Change Summary</h3>
+          <AuditLogSummary 
+            taskId={task.id}
+            onViewAllClick={() => setShowHistory(true)}
+          />
         </div>
+
+        {/* Full History */}
+        {showHistory && (
+          <div className="task-detail__section">
+            <div className="task-detail__section-header">
+              <h3 className="task-detail__section-title">Full History</h3>
+              <Button
+                variant="ghost"
+                size="small"
+                onClick={() => setShowHistory(false)}
+              >
+                Hide History
+              </Button>
+            </div>
+            <AuditLogTimeline 
+              taskId={task.id}
+              className="task-detail__audit-timeline"
+              showFilters={true}
+              maxItems={100}
+            />
+          </div>
+        )}
 
         {/* Actions */}
         <div className="task-detail__actions">

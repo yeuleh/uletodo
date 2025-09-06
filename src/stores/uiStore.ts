@@ -7,14 +7,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type { Task } from '@/types/Task.types';
 
-export interface ModalState {
-  createTask: boolean;
-  editTask: boolean;
-  deleteTask: boolean;
-  taskDetail: boolean;
-  tagManager: boolean;
-  settings: boolean;
-}
+export type ModalName = 'createTask' | 'editTask' | 'deleteTask' | 'taskDetail' | 'tagManager' | 'settings' | 'createSubtask';
 
 export interface FilterUIState {
   showFilterPanel: boolean;
@@ -42,7 +35,7 @@ export interface ViewState {
 
 export interface UIState {
   // Modal states
-  modals: ModalState;
+  modals: Set<ModalName>;
   
   // Filter UI state
   filterUI: FilterUIState;
@@ -68,8 +61,8 @@ export interface UIState {
   viewingTask: Task | null;
   
   // Actions for modals
-  openModal: (modal: keyof ModalState) => void;
-  closeModal: (modal: keyof ModalState) => void;
+  openModal: (modal: ModalName) => void;
+  closeModal: (modal: ModalName) => void;
   closeAllModals: () => void;
   
   // Actions for filter UI
@@ -112,14 +105,7 @@ export const useUIStore = create<UIState>()(
   devtools(
     (set, get) => ({
       // Initial state
-      modals: {
-        createTask: false,
-        editTask: false,
-        deleteTask: false,
-        taskDetail: false,
-        tagManager: false,
-        settings: false
-      },
+      modals: new Set<ModalName>(),
       
       filterUI: {
         showFilterPanel: false,
@@ -151,20 +137,19 @@ export const useUIStore = create<UIState>()(
       viewingTask: null,
 
       // Modal actions
-      openModal: (modal) => set((state) => ({
-        modals: { ...state.modals, [modal]: true }
-      })),
+      openModal: (modal) => set((state) => {
+        const newModals = new Set(state.modals);
+        newModals.add(modal);
+        return { modals: newModals };
+      }),
       
-      closeModal: (modal) => set((state) => ({
-        modals: { ...state.modals, [modal]: false }
-      })),
+      closeModal: (modal) => set((state) => {
+        const newModals = new Set(state.modals);
+        newModals.delete(modal);
+        return { modals: newModals };
+      }),
       
-      closeAllModals: () => set((state) => ({
-        modals: Object.keys(state.modals).reduce((acc, key) => ({
-          ...acc,
-          [key]: false
-        }), {} as ModalState)
-      })),
+      closeAllModals: () => set({ modals: new Set<ModalName>() }),
 
       // Filter UI actions
       toggleFilterPanel: () => set((state) => ({
@@ -304,7 +289,7 @@ export const useUIStore = create<UIState>()(
       // Computed getters
       isAnyModalOpen: () => {
         const { modals } = get();
-        return Object.values(modals).some(isOpen => isOpen);
+        return modals.size > 0;
       },
       
       getSelectedTaskCount: () => {

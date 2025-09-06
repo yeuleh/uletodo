@@ -154,3 +154,33 @@ pub async fn add_subtask(parent_id: String, input: CreateTaskInput) -> Result<Ta
     
     Ok(subtask)
 }
+
+#[tauri::command]
+pub async fn get_subtasks(parent_id: String) -> Result<Vec<TaskModel>, TaskError> {
+    let pool = get_db_pool();
+    let task_repo = Arc::new(SqliteTaskRepository::new(pool.clone()));
+    let audit_repo = Arc::new(SqliteAuditRepository::new(pool.clone()));
+    let task_service = TaskServiceImpl::new(task_repo, audit_repo);
+    
+    let filter = TaskFilter {
+        status: None,
+        priority: None,
+        tags: None,
+        due_date_from: None,
+        due_date_to: None,
+        parent_id: Some(parent_id),
+        search_query: None,
+    };
+    
+    task_service.list_tasks(Some(filter)).await
+}
+
+#[tauri::command]
+pub async fn calculate_task_progress(task_id: String) -> Result<f32, TaskError> {
+    let pool = get_db_pool();
+    let task_repo = Arc::new(SqliteTaskRepository::new(pool.clone()));
+    let audit_repo = Arc::new(SqliteAuditRepository::new(pool.clone()));
+    let task_service = TaskServiceImpl::new(task_repo, audit_repo);
+    
+    task_service.calculate_parent_progress(&task_id).await
+}

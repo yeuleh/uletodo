@@ -291,6 +291,73 @@ impl TaskService for TaskServiceImpl {
                 ).await.map_err(|e| TaskError::Database { message: e.to_string() })?;
             }
         }
+
+        if let Some(due_date) = input.due_date {
+            if Some(due_date) != old_task.due_date {
+                let old_date = old_task.due_date.map(|d| d.to_string()).unwrap_or_default();
+                let new_date = due_date.to_string();
+                self.audit_repo.log(
+                    id,
+                    AuditAction::Updated,
+                    if old_date.is_empty() { None } else { Some(old_date) },
+                    Some(new_date),
+                    Some("due_date".to_string())
+                ).await.map_err(|e| TaskError::Database { message: e.to_string() })?;
+            }
+        }
+
+        if let Some(estimated_duration) = input.estimated_duration {
+            if Some(estimated_duration) != old_task.estimated_duration {
+                let old_duration = old_task.estimated_duration.map(|d| d.to_string()).unwrap_or_default();
+                let new_duration = estimated_duration.to_string();
+                self.audit_repo.log(
+                    id,
+                    AuditAction::Updated,
+                    if old_duration.is_empty() { None } else { Some(old_duration) },
+                    Some(new_duration),
+                    Some("estimated_duration".to_string())
+                ).await.map_err(|e| TaskError::Database { message: e.to_string() })?;
+            }
+        }
+
+        if let Some(start_time) = input.start_time {
+            if Some(start_time) != old_task.start_time {
+                let old_time = old_task.start_time.map(|t| t.to_string()).unwrap_or_default();
+                let new_time = start_time.to_string();
+                self.audit_repo.log(
+                    id,
+                    AuditAction::Updated,
+                    if old_time.is_empty() { None } else { Some(old_time) },
+                    Some(new_time),
+                    Some("start_time".to_string())
+                ).await.map_err(|e| TaskError::Database { message: e.to_string() })?;
+            }
+        }
+
+        // Handle tag changes
+        if let Some(new_tags) = &input.tags {
+            // Get current tags for comparison
+            let old_tags = self.task_repo.get_task_tags(id).await
+                .map_err(|e| TaskError::Database { message: e.to_string() })?;
+            
+            // Compare tag lists
+            let mut old_tags_sorted = old_tags.clone();
+            old_tags_sorted.sort();
+            let mut new_tags_sorted = new_tags.clone();
+            new_tags_sorted.sort();
+            
+            if old_tags_sorted != new_tags_sorted {
+                let old_tags_str = old_tags.join(", ");
+                let new_tags_str = new_tags.join(", ");
+                self.audit_repo.log(
+                    id,
+                    AuditAction::Updated,
+                    if old_tags_str.is_empty() { None } else { Some(old_tags_str) },
+                    if new_tags_str.is_empty() { None } else { Some(new_tags_str) },
+                    Some("tags".to_string())
+                ).await.map_err(|e| TaskError::Database { message: e.to_string() })?;
+            }
+        }
         
         // Update parent progress if this task has a parent
         if let Some(parent_id) = &updated_task.parent_id {
