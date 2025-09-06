@@ -12,7 +12,9 @@ import {
   ErrorMessage,
 } from './common';
 import { TaskForm } from './task';
-import { TaskPriority, Tag, CreateTaskInput } from '@/types';
+import { TaskFilterDemo } from './demo/TaskFilterDemo';
+import { AdvancedFilteringDemo } from './demo/AdvancedFilteringDemo';
+import { TaskPriority, Tag, CreateTaskInput, UpdateTaskInput } from '@/types';
 import './ComponentPreview.css';
 
 export const ComponentPreview: React.FC = () => {
@@ -46,7 +48,7 @@ export const ComponentPreview: React.FC = () => {
     };
   };
 
-  const handleTaskSave = async (taskData: CreateTaskInput) => {
+  const handleTaskSave = async (taskData: CreateTaskInput | UpdateTaskInput) => {
     setLoading(true);
     // Mock save delay
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -196,6 +198,18 @@ export const ComponentPreview: React.FC = () => {
               />
             </div>
           </div>
+        </section>
+
+        {/* Task Filter Demo */}
+        <section className="preview-section">
+          <h2>任务过滤器演示 (TaskFilter)</h2>
+          <TaskFilterDemo />
+        </section>
+
+        {/* Advanced Filtering Demo */}
+        <section className="preview-section">
+          <h2>高级过滤演示 (Advanced Filtering)</h2>
+          <AdvancedFilteringDemo />
         </section>
 
         {/* Interactive Demos */}

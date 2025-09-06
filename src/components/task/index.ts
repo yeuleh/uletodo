@@ -5,3 +5,7 @@ export { TaskItem } from './TaskItem';
 export type { TaskItemProps } from './TaskItem';
 export { TaskList } from './TaskList';
 export type { TaskListProps } from './TaskList';
+export { TaskDetail } from './TaskDetail';
+export type { TaskDetailProps } from './TaskDetail';
+export { TaskFilter } from './TaskFilter';
+export type { TaskFilterProps } from './TaskFilter';

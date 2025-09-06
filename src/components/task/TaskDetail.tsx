@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Task, TaskStatus, TaskPriority, AuditLog, AuditAction } from '@/types';
+import { Task, TaskStatus, TaskPriority, AuditLog, AuditAction, CreateTaskInput, UpdateTaskInput } from '@/types';
 import { TaskForm } from './TaskForm';
 import { TaskItem } from './TaskItem';
 import { Button, Modal } from '@/components/common';
@@ -54,7 +54,16 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({
     setIsEditing(true);
   };
 
-  const handleSave = (updatedTask: Task) => {
+  const handleSave = async (taskData: CreateTaskInput | UpdateTaskInput) => {
+    // Convert the form data back to a Task object for the parent component
+    const updatedTask: Task = {
+      ...task,
+      ...taskData,
+      id: task.id, // Preserve the original ID
+      status: task.status, // Preserve status (form doesn't change this)
+      createdAt: task.createdAt, // Preserve creation date
+      updatedAt: new Date(), // Update the modification date
+    };
     onSave(updatedTask);
     setIsEditing(false);
   };

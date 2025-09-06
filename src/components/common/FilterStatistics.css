@@ -1,0 +1,200 @@
+/**
+ * FilterStatistics component styles
+ */
+
+.filter-statistics {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  font-size: 14px;
+}
+
+.filter-statistics--compact {
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.filter-statistics__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.filter-statistics__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.filter-statistics__main-count {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.filter-statistics__summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-statistics__count {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.filter-statistics__percentage {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.filter-statistics__alert {
+  display: flex;
+  align-items: center;
+}
+
+.filter-statistics__overdue {
+  color: var(--color-error);
+  font-weight: 500;
+  font-size: 12px;
+}
+
+.filter-statistics__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.filter-statistics__section {
+  min-width: 0;
+}
+
+.filter-statistics__section-title {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-statistics__items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-statistics__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.filter-statistics__item--alert {
+  background: var(--color-error-light, rgba(239, 68, 68, 0.1));
+  padding: 6px 8px;
+  border-radius: 4px;
+  margin: -2px -4px;
+}
+
+.filter-statistics__label {
+  color: var(--color-text-primary);
+  font-weight: 400;
+}
+
+.filter-statistics__label--high {
+  color: var(--color-priority-high, #ef4444);
+}
+
+.filter-statistics__label--medium {
+  color: var(--color-priority-medium, #f97316);
+}
+
+.filter-statistics__label--low {
+  color: var(--color-priority-low, #3b82f6);
+}
+
+.filter-statistics__tag {
+  background: var(--color-tag-bg, #f3f4f6);
+  color: var(--color-tag-text, #374151);
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.filter-statistics__value {
+  color: var(--color-text-primary);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .filter-statistics__grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .filter-statistics__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .filter-statistics--compact {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .filter-statistics {
+    background: var(--color-surface-dark, #1f2937);
+    border-color: var(--color-border-dark, #374151);
+  }
+  
+  .filter-statistics__title {
+    color: var(--color-text-primary-dark, #f9fafb);
+  }
+  
+  .filter-statistics__main-count {
+    color: var(--color-text-primary-dark, #f9fafb);
+  }
+  
+  .filter-statistics__count {
+    color: var(--color-text-primary-dark, #f9fafb);
+  }
+  
+  .filter-statistics__percentage {
+    color: var(--color-text-secondary-dark, #9ca3af);
+  }
+  
+  .filter-statistics__section-title {
+    color: var(--color-text-secondary-dark, #9ca3af);
+  }
+  
+  .filter-statistics__label {
+    color: var(--color-text-primary-dark, #f9fafb);
+  }
+  
+  .filter-statistics__value {
+    color: var(--color-text-primary-dark, #f9fafb);
+  }
+  
+  .filter-statistics__tag {
+    background: var(--color-tag-bg-dark, #374151);
+    color: var(--color-tag-text-dark, #d1d5db);
+  }
+}

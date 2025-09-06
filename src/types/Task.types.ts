@@ -62,6 +62,45 @@ export interface TaskFilter {
   dueDateTo?: Date;
   parentId?: string;
   searchQuery?: string;
+  // Advanced filtering
+  logicOperator?: FilterLogicOperator;
+  tagLogicOperator?: FilterLogicOperator;
+  customFilters?: CustomFilter[];
+}
+
+export enum FilterLogicOperator {
+  AND = 'and',
+  OR = 'or'
+}
+
+export interface CustomFilter {
+  id: string;
+  name: string;
+  filter: TaskFilter;
+  isBuiltIn?: boolean;
+}
+
+export interface FilterStatistics {
+  totalTasks: number;
+  filteredTasks: number;
+  completedTasks: number;
+  pendingTasks: number;
+  overdueTasks: number;
+  todayTasks: number;
+  thisWeekTasks: number;
+  byPriority: Record<TaskPriority, number>;
+  byStatus: Record<TaskStatus, number>;
+  byTags: Record<string, number>;
+}
+
+export interface SavedFilter {
+  id: string;
+  name: string;
+  filter: TaskFilter;
+  isBuiltIn: boolean;
+  createdAt: Date;
+  lastUsed?: Date;
+  usageCount: number;
 }
 
 export enum TaskSortOption {

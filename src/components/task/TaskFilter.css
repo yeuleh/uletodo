@@ -1,0 +1,325 @@
+/**
+ * TaskFilter component styles
+ */
+
+.task-filter {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1rem;
+  max-width: 400px;
+}
+
+.task-filter--compact {
+  padding: 0.75rem;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Header */
+.task-filter__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.task-filter__title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.task-filter__clear-all {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+}
+
+.task-filter__clear-all:hover {
+  color: var(--color-danger);
+}
+
+/* Sections */
+.task-filter__section {
+  margin-bottom: 1.5rem;
+}
+
+.task-filter__section:last-child {
+  margin-bottom: 0;
+}
+
+.task-filter__label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+/* Search */
+.task-filter__search {
+  position: relative;
+}
+
+.task-filter__search-input {
+  width: 100%;
+}
+
+.task-filter__search-help {
+  margin-top: 0.25rem;
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+}
+
+.task-filter__search-help code {
+  background: var(--color-surface-secondary);
+  padding: 0.125rem 0.25rem;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+/* Quick Filters */
+.task-filter__quick-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.task-filter--compact .task-filter__quick-filters {
+  justify-content: flex-start;
+}
+
+.task-filter__quick-button--active {
+  background: var(--color-primary);
+  color: var(--color-primary-text);
+  border-color: var(--color-primary);
+}
+
+.task-filter__clear-button {
+  margin-left: auto;
+  color: var(--color-text-secondary);
+}
+
+.task-filter__clear-button:hover {
+  color: var(--color-danger);
+}
+
+/* Checkbox Groups */
+.task-filter__checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.task-filter__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.task-filter__checkbox input[type="checkbox"],
+.task-filter__checkbox input[type="radio"] {
+  margin: 0;
+  cursor: pointer;
+}
+
+/* Status Labels */
+.task-filter__status-label {
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+.task-filter__status-label--todo {
+  color: var(--color-info);
+}
+
+.task-filter__status-label--in_progress {
+  color: var(--color-warning);
+}
+
+.task-filter__status-label--completed {
+  color: var(--color-success);
+}
+
+/* Priority Labels */
+.task-filter__priority-label {
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+.task-filter__priority-label--high {
+  color: var(--color-danger);
+}
+
+.task-filter__priority-label--medium {
+  color: var(--color-warning);
+}
+
+.task-filter__priority-label--low {
+  color: var(--color-info);
+}
+
+.task-filter__priority-label--none {
+  color: var(--color-text-secondary);
+}
+
+/* Tag Selector */
+.task-filter__tag-selector {
+  width: 100%;
+}
+
+.task-filter__tag-logic {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  background: var(--color-surface-secondary);
+  border-radius: 4px;
+}
+
+/* Date Range */
+.task-filter__date-range {
+  display: flex;
+  gap: 0.5rem;
+  align-items: end;
+}
+
+.task-filter__date-input {
+  flex: 1;
+}
+
+/* Logic Group */
+.task-filter__logic-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: var(--color-surface-secondary);
+  border-radius: 4px;
+}
+
+/* Advanced Toggle */
+.task-filter__advanced-toggle {
+  width: 100%;
+  justify-content: center;
+  color: var(--color-text-secondary);
+  border: 1px dashed var(--color-border);
+}
+
+.task-filter__advanced-toggle:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/* Saved Filters */
+.task-filter__saved-filters {
+  border: none;
+  padding: 0;
+  background: transparent;
+}
+
+/* Statistics */
+.task-filter__statistics {
+  border: none;
+  padding: 0;
+  background: transparent;
+}
+
+.task-filter--compact .task-filter__statistics {
+  margin-top: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .task-filter {
+    max-width: none;
+    padding: 0.75rem;
+  }
+  
+  .task-filter__date-range {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .task-filter__quick-filters {
+    justify-content: center;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .task-filter {
+    background: var(--color-surface-dark, #1a1a1a);
+    border-color: var(--color-border-dark, #333);
+  }
+  
+  .task-filter__title {
+    color: var(--color-text-primary-dark, #fff);
+  }
+  
+  .task-filter__label {
+    color: var(--color-text-primary-dark, #fff);
+  }
+  
+  .task-filter__search-help {
+    color: var(--color-text-secondary-dark, #aaa);
+  }
+  
+  .task-filter__search-help code {
+    background: var(--color-surface-secondary-dark, #2a2a2a);
+  }
+  
+  .task-filter__tag-logic,
+  .task-filter__logic-group {
+    background: var(--color-surface-secondary-dark, #2a2a2a);
+  }
+}
+
+/* Focus States */
+.task-filter__checkbox:focus-within {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Animation */
+.task-filter__section {
+  transition: opacity 0.2s ease-in-out;
+}
+
+.task-filter__quick-filters button {
+  transition: all 0.2s ease-in-out;
+}
+
+.task-filter__advanced-toggle {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Loading State */
+.task-filter--loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.task-filter--loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}

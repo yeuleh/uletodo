@@ -9,10 +9,13 @@ import type {
   Task, 
   CreateTaskInput, 
   UpdateTaskInput, 
-  TaskFilter
+  TaskFilter,
+  FilterStatistics,
+  SavedFilter
 } from '@/types/Task.types';
 import { TaskSortOption } from '@/types/Task.types';
 import { TaskService, type TaskError } from '@/services/TaskService';
+import { FilterService } from '@/services/FilterService';
 
 export interface TaskState {
   // Task data
@@ -35,6 +38,11 @@ export interface TaskState {
   // UI state
   showCompleted: boolean;
   
+  // Advanced filtering state
+  savedFilters: SavedFilter[];
+  activeFilterId: string | null;
+  filterStatistics: FilterStatistics | null;
+  
   // Actions
   setTasks: (tasks: Task[]) => void;
   setSelectedTask: (task: Task | null) => void;
@@ -42,6 +50,14 @@ export interface TaskState {
   setSortBy: (sortBy: TaskSortOption) => void;
   setShowCompleted: (show: boolean) => void;
   setError: (error: TaskError | null) => void;
+  
+  // Advanced filtering actions
+  loadSavedFilters: () => void;
+  applySavedFilter: (filterId: string) => void;
+  saveCurrentFilter: (name: string) => SavedFilter;
+  deleteSavedFilter: (filterId: string) => boolean;
+  updateFilterStatistics: () => void;
+  parseAndApplySearchQuery: (query: string) => void;
   
   // Async actions
   loadTasks: () => Promise<void>;
@@ -57,6 +73,8 @@ export interface TaskState {
   getSubtasks: (parentId: string) => Task[];
   getCompletedTasksCount: () => number;
   getTotalTasksCount: () => number;
+  getAllSavedFilters: () => SavedFilter[];
+  getActiveFilter: () => SavedFilter | null;
 }
 
 export const useTaskStore = create<TaskState>()(
@@ -73,6 +91,9 @@ export const useTaskStore = create<TaskState>()(
       filter: {},
       sortBy: TaskSortOption.CREATED_AT_DESC,
       showCompleted: true,
+      savedFilters: [],
+      activeFilterId: null,
+      filterStatistics: null,
 
       // Basic setters
       setTasks: (tasks) => set({ tasks }),
@@ -91,6 +112,15 @@ export const useTaskStore = create<TaskState>()(
           const { filter, sortBy } = get();
           const tasks = await TaskService.listTasks(filter, sortBy);
           set({ tasks, loading: false });
+          
+          // Load saved filters if not already loaded
+          const { savedFilters } = get();
+          if (savedFilters.length === 0) {
+            get().loadSavedFilters();
+          }
+          
+          // Update statistics
+          get().updateFilterStatistics();
         } catch (error) {
           set({ 
             error: error as TaskError, 
@@ -196,71 +226,78 @@ export const useTaskStore = create<TaskState>()(
         }
       },
 
+      // Advanced filtering actions
+      loadSavedFilters: () => {
+        const savedFilters = FilterService.getAllFilters();
+        set({ savedFilters });
+      },
+
+      applySavedFilter: (filterId) => {
+        const { savedFilters } = get();
+        const savedFilter = savedFilters.find(f => f.id === filterId);
+        
+        if (savedFilter) {
+          set({ 
+            filter: savedFilter.filter,
+            activeFilterId: filterId
+          });
+          FilterService.recordFilterUsage(filterId);
+          get().updateFilterStatistics();
+        }
+      },
+
+      saveCurrentFilter: (name) => {
+        const { filter } = get();
+        const savedFilter = FilterService.saveFilter(name, filter);
+        
+        set((state) => ({
+          savedFilters: [...state.savedFilters, savedFilter],
+          activeFilterId: savedFilter.id
+        }));
+        
+        return savedFilter;
+      },
+
+      deleteSavedFilter: (filterId) => {
+        const success = FilterService.deleteSavedFilter(filterId);
+        
+        if (success) {
+          set((state) => ({
+            savedFilters: state.savedFilters.filter(f => f.id !== filterId),
+            activeFilterId: state.activeFilterId === filterId ? null : state.activeFilterId
+          }));
+        }
+        
+        return success;
+      },
+
+      updateFilterStatistics: () => {
+        const { tasks } = get();
+        const filteredTasks = get().getFilteredTasks();
+        const statistics = FilterService.calculateStatistics(tasks, filteredTasks);
+        set({ filterStatistics: statistics });
+      },
+
+      parseAndApplySearchQuery: (query) => {
+        const parsedFilter = FilterService.parseSearchQuery(query);
+        set({ 
+          filter: parsedFilter,
+          activeFilterId: null
+        });
+        get().updateFilterStatistics();
+      },
+
       // Computed getters
       getFilteredTasks: () => {
         const { tasks, filter, showCompleted, sortBy } = get();
         
-        let filteredTasks = tasks.filter(task => {
-          // Filter by completion status
-          if (!showCompleted && task.status === 'completed') {
-            return false;
-          }
+        // Apply show completed filter first
+        let filteredTasks = showCompleted 
+          ? tasks 
+          : tasks.filter(task => task.status !== 'completed');
 
-          // Filter by status
-          if (filter.status && filter.status.length > 0) {
-            if (!filter.status.includes(task.status)) {
-              return false;
-            }
-          }
-
-          // Filter by priority
-          if (filter.priority && filter.priority.length > 0) {
-            if (!filter.priority.includes(task.priority)) {
-              return false;
-            }
-          }
-
-          // Filter by tags
-          if (filter.tags && filter.tags.length > 0) {
-            const hasMatchingTag = filter.tags.some(tag => 
-              task.tags.includes(tag)
-            );
-            if (!hasMatchingTag) {
-              return false;
-            }
-          }
-
-          // Filter by due date range
-          if (filter.dueDateFrom && task.dueDate) {
-            if (new Date(task.dueDate) < new Date(filter.dueDateFrom)) {
-              return false;
-            }
-          }
-          if (filter.dueDateTo && task.dueDate) {
-            if (new Date(task.dueDate) > new Date(filter.dueDateTo)) {
-              return false;
-            }
-          }
-
-          // Filter by parent ID
-          if (filter.parentId !== undefined) {
-            if (task.parentId !== filter.parentId) {
-              return false;
-            }
-          }
-
-          // Filter by search query
-          if (filter.searchQuery) {
-            const query = filter.searchQuery.toLowerCase();
-            const matchesTitle = task.title.toLowerCase().includes(query);
-            const matchesDescription = task.description?.toLowerCase().includes(query);
-            if (!matchesTitle && !matchesDescription) {
-              return false;
-            }
-          }
-
-          return true;
-        });
+        // Apply advanced filtering
+        filteredTasks = FilterService.applyAdvancedFilter(filteredTasks, filter);
 
         // Sort tasks
         filteredTasks.sort((a, b) => {
@@ -306,6 +343,15 @@ export const useTaskStore = create<TaskState>()(
 
       getTotalTasksCount: () => {
         return get().tasks.length;
+      },
+
+      getAllSavedFilters: () => {
+        return get().savedFilters;
+      },
+
+      getActiveFilter: () => {
+        const { savedFilters, activeFilterId } = get();
+        return activeFilterId ? savedFilters.find(f => f.id === activeFilterId) || null : null;
       }
     }),
     {

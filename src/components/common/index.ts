@@ -28,3 +28,7 @@ export type { ErrorMessageProps } from './ErrorMessage';
 
 export { TagSelector } from './TagSelector';
 export type { TagSelectorProps } from './TagSelector';
+
+export { FilterStatistics } from './FilterStatistics';
+
+export { SavedFilters } from './SavedFilters';

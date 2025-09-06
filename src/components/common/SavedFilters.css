@@ -1,0 +1,221 @@
+/**
+ * SavedFilters component styles
+ */
+
+.saved-filters {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  min-width: 250px;
+}
+
+.saved-filters--compact {
+  padding: 8px;
+  border: none;
+  background: transparent;
+}
+
+.saved-filters__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.saved-filters__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.saved-filters__save-button {
+  flex-shrink: 0;
+}
+
+.saved-filters__quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.saved-filters__quick-button {
+  flex-shrink: 0;
+}
+
+.saved-filters__section {
+  margin-bottom: 20px;
+}
+
+.saved-filters__section:last-child {
+  margin-bottom: 0;
+}
+
+.saved-filters__section-title {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.saved-filters__list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.saved-filters__item {
+  display: flex;
+  align-items: center;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.saved-filters__item:hover {
+  background: var(--color-hover, rgba(0, 0, 0, 0.05));
+}
+
+.saved-filters__item--active {
+  background: var(--color-primary-light, rgba(59, 130, 246, 0.1));
+  border: 1px solid var(--color-primary, #3b82f6);
+}
+
+.saved-filters__item--active:hover {
+  background: var(--color-primary-light, rgba(59, 130, 246, 0.15));
+}
+
+.saved-filters__item-button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.saved-filters__item-button:hover {
+  background: transparent;
+}
+
+.saved-filters__item-name {
+  font-weight: 500;
+  color: var(--color-text-primary);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.saved-filters__item--active .saved-filters__item-name {
+  color: var(--color-primary, #3b82f6);
+  font-weight: 600;
+}
+
+.saved-filters__item-usage {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}
+
+.saved-filters__item-date {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}
+
+.saved-filters__delete-button {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  margin-right: 4px;
+  border-radius: 4px;
+  font-size: 16px;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.saved-filters__item:hover .saved-filters__delete-button {
+  opacity: 1;
+}
+
+.saved-filters__delete-button:hover {
+  background: var(--color-error-light, rgba(239, 68, 68, 0.1));
+  color: var(--color-error, #ef4444);
+}
+
+/* Save modal styles */
+.saved-filters__save-modal {
+  max-width: 400px;
+}
+
+.saved-filters__save-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.saved-filters__save-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .saved-filters {
+    min-width: auto;
+  }
+  
+  .saved-filters__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .saved-filters__quick-actions {
+    justify-content: center;
+  }
+  
+  .saved-filters__save-actions {
+    flex-direction: column-reverse;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .saved-filters {
+    background: var(--color-surface-dark, #1f2937);
+    border-color: var(--color-border-dark, #374151);
+  }
+  
+  .saved-filters__title {
+    color: var(--color-text-primary-dark, #f9fafb);
+  }
+  
+  .saved-filters__section-title {
+    color: var(--color-text-secondary-dark, #9ca3af);
+  }
+  
+  .saved-filters__item:hover {
+    background: var(--color-hover-dark, rgba(255, 255, 255, 0.05));
+  }
+  
+  .saved-filters__item-name {
+    color: var(--color-text-primary-dark, #f9fafb);
+  }
+  
+  .saved-filters__item-usage,
+  .saved-filters__item-date {
+    color: var(--color-text-secondary-dark, #9ca3af);
+  }
+}

@@ -8,6 +8,7 @@ import { useTaskStore } from './taskStore';
 import { useTagStore } from './tagStore';
 import { useUIStore } from './uiStore';
 import { TaskStatus } from '@/types/Task.types';
+import type { TaskFilter } from '@/types/Task.types';
 
 // Task store hooks
 export const useTaskActions = () => {
@@ -20,7 +21,13 @@ export const useTaskActions = () => {
     addSubtask,
     setFilter,
     setSortBy,
-    setShowCompleted
+    setShowCompleted,
+    loadSavedFilters,
+    applySavedFilter,
+    saveCurrentFilter,
+    deleteSavedFilter,
+    updateFilterStatistics,
+    parseAndApplySearchQuery
   } = useTaskStore();
 
   return {
@@ -32,7 +39,13 @@ export const useTaskActions = () => {
     addSubtask,
     setFilter,
     setSortBy,
-    setShowCompleted
+    setShowCompleted,
+    loadSavedFilters,
+    applySavedFilter,
+    saveCurrentFilter,
+    deleteSavedFilter,
+    updateFilterStatistics,
+    parseAndApplySearchQuery
   };
 };
 
@@ -50,15 +63,20 @@ export const useTaskData = () => {
     sortBy: state.sortBy,
     showCompleted: state.showCompleted,
     completedCount: state.getCompletedTasksCount(),
-    totalCount: state.getTotalTasksCount()
+    totalCount: state.getTotalTasksCount(),
+    savedFilters: state.savedFilters,
+    activeFilterId: state.activeFilterId,
+    filterStatistics: state.filterStatistics
   }));
 };
 
 export const useTaskSelectors = () => {
   const getTaskById = useTaskStore((state) => state.getTaskById);
   const getSubtasks = useTaskStore((state) => state.getSubtasks);
+  const getAllSavedFilters = useTaskStore((state) => state.getAllSavedFilters);
+  const getActiveFilter = useTaskStore((state) => state.getActiveFilter);
   
-  return { getTaskById, getSubtasks };
+  return { getTaskById, getSubtasks, getAllSavedFilters, getActiveFilter };
 };
 
 // Tag store hooks
@@ -275,7 +293,7 @@ export const useTaskFiltering = () => {
 };
 
 export const useTaskSearch = () => {
-  const { setFilter, filter } = useTaskStore();
+  const { setFilter, filter, parseAndApplySearchQuery } = useTaskStore();
   
   const search = useCallback((query: string) => {
     setFilter({ searchQuery: query });
@@ -284,10 +302,102 @@ export const useTaskSearch = () => {
   const clearSearch = useCallback(() => {
     setFilter({ searchQuery: undefined });
   }, [setFilter]);
+
+  const smartSearch = useCallback((query: string) => {
+    parseAndApplySearchQuery(query);
+  }, [parseAndApplySearchQuery]);
   
   return {
     searchQuery: filter.searchQuery || '',
     search,
-    clearSearch
+    clearSearch,
+    smartSearch
+  };
+};
+
+// Advanced filtering hooks
+export const useAdvancedFiltering = () => {
+  const {
+    filter,
+    savedFilters,
+    activeFilterId,
+    filterStatistics,
+    setFilter,
+    loadSavedFilters,
+    applySavedFilter,
+    saveCurrentFilter,
+    deleteSavedFilter,
+    updateFilterStatistics
+  } = useTaskStore();
+
+  const applyFilter = useCallback((newFilter: Partial<TaskFilter>) => {
+    setFilter(newFilter);
+    updateFilterStatistics();
+  }, [setFilter, updateFilterStatistics]);
+
+  const resetFilter = useCallback(() => {
+    setFilter({});
+    updateFilterStatistics();
+  }, [setFilter, updateFilterStatistics]);
+
+  return {
+    filter,
+    savedFilters,
+    activeFilterId,
+    filterStatistics,
+    applyFilter,
+    resetFilter,
+    loadSavedFilters,
+    applySavedFilter,
+    saveCurrentFilter,
+    deleteSavedFilter,
+    updateFilterStatistics
+  };
+};
+
+export const useFilterStatistics = () => {
+  const { filterStatistics, updateFilterStatistics } = useTaskStore();
+  
+  return {
+    statistics: filterStatistics,
+    updateStatistics: updateFilterStatistics
+  };
+};
+
+export const useSavedFilters = () => {
+  const {
+    savedFilters,
+    activeFilterId,
+    loadSavedFilters,
+    applySavedFilter,
+    saveCurrentFilter,
+    deleteSavedFilter
+  } = useTaskStore();
+
+  const getBuiltInFilters = useCallback(() => {
+    return savedFilters.filter(f => f.isBuiltIn);
+  }, [savedFilters]);
+
+  const getCustomFilters = useCallback(() => {
+    return savedFilters.filter(f => !f.isBuiltIn);
+  }, [savedFilters]);
+
+  const getMostUsedFilters = useCallback((limit = 5) => {
+    return savedFilters
+      .filter(f => !f.isBuiltIn && f.usageCount > 0)
+      .sort((a, b) => b.usageCount - a.usageCount)
+      .slice(0, limit);
+  }, [savedFilters]);
+
+  return {
+    savedFilters,
+    activeFilterId,
+    loadSavedFilters,
+    applySavedFilter,
+    saveCurrentFilter,
+    deleteSavedFilter,
+    getBuiltInFilters,
+    getCustomFilters,
+    getMostUsedFilters
   };
 };
