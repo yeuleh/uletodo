@@ -4,13 +4,12 @@
  */
 
 // Import Tauri invoke
-// import { invoke as tauriInvoke } from '@tauri-apps/api/core';
+import { invoke as tauriInvoke } from '@tauri-apps/api/core';
 
 // Check if we're in Tauri environment
-// const isTauri = typeof window !== 'undefined' && (window as any).__TAURI__;
+const isTauri = typeof window !== 'undefined' && (window as any).__TAURI__;
 
 // Mock data for browser environment
-/*
 const mockTasks: Task[] = [
   {
     id: '1',
@@ -44,10 +43,8 @@ const mockTasks: Task[] = [
     tags: []
   }
 ];
-*/
 
 // Mock Tauri commands for browser environment
-/*
 const mockTauriCommand = async (cmd: string, args?: any): Promise<any> => {
   console.log(`Mock Tauri command: ${cmd}`, args);
   
@@ -117,16 +114,15 @@ const mockTauriCommand = async (cmd: string, args?: any): Promise<any> => {
       throw new Error(`Unknown command: ${cmd}`);
   }
 };
-*/
 
 // Wrapper function that uses Tauri or mock depending on environment
-// const invokeCommand = async (cmd: string, args?: any): Promise<any> => {
-//   if (isTauri) {
-//     return tauriInvoke(cmd, args);
-//   } else {
-//     return mockTauriCommand(cmd, args);
-//   }
-// };
+const invokeCommand = async (cmd: string, args?: any): Promise<any> => {
+  if (isTauri) {
+    return tauriInvoke(cmd, args);
+  } else {
+    return mockTauriCommand(cmd, args);
+  }
+};
 import type { 
   Task, 
   CreateTaskInput, 
@@ -200,12 +196,8 @@ export class TaskService {
       }
     }
 
-    return errorService.executeCommand<T>(
-      command,
-      args,
-      context,
-      retryOptions ? { maxAttempts: retryOptions.maxAttempts } : undefined
-    );
+    // For now, directly call invokeCommand - can be enhanced with error service later
+    return invokeCommand(command, args);
   }
 
   /**
