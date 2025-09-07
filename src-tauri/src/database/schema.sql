@@ -1,0 +1,2 @@
+-- Database schema
+-- Will be implemented in later tasks
