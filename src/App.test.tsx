@@ -1,6 +1,11 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import App from './App';
+
+// Mock Tauri API for testing
+vi.mock('@tauri-apps/api/tauri', () => ({
+  invoke: vi.fn().mockResolvedValue([]),
+}));
 
 describe('App', () => {
   it('renders uletodo title', () => {
@@ -8,10 +13,13 @@ describe('App', () => {
     expect(screen.getByText('uletodo')).toBeInTheDocument();
   });
 
-  it('renders initialization message', () => {
+  it('renders add task button', () => {
     render(<App />);
-    expect(
-      screen.getByText('待办事项管理应用 - 项目初始化完成')
-    ).toBeInTheDocument();
+    expect(screen.getByText('添加任务')).toBeInTheDocument();
+  });
+
+  it('renders task list header', () => {
+    render(<App />);
+    expect(screen.getByText('任务列表')).toBeInTheDocument();
   });
 });
