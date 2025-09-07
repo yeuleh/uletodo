@@ -8,18 +8,21 @@ vi.mock('@tauri-apps/api/tauri', () => ({
 }));
 
 describe('App', () => {
-  it('renders uletodo title', () => {
+  it('renders user info in sidebar', () => {
     render(<App />);
-    expect(screen.getByText('uletodo')).toBeInTheDocument();
+    expect(screen.getByText('用户')).toBeInTheDocument();
+    expect(screen.getByText('个人版')).toBeInTheDocument();
   });
 
-  it('renders add task button', () => {
+  it('renders add task buttons', () => {
     render(<App />);
-    expect(screen.getByText('添加任务')).toBeInTheDocument();
+    const addTaskButtons = screen.getAllByText('添加任务');
+    expect(addTaskButtons.length).toBeGreaterThan(0);
   });
 
   it('renders task list header', () => {
     render(<App />);
-    expect(screen.getByText('任务列表')).toBeInTheDocument();
+    const inboxHeaders = screen.getAllByText('收件箱');
+    expect(inboxHeaders.length).toBeGreaterThan(0);
   });
 });
