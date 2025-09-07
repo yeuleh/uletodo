@@ -7,14 +7,17 @@ mod tests {
     fn create_test_db() -> Connection {
         let conn = Connection::open_in_memory().unwrap();
         
-        // Create tasks table
+        // Create tasks table with all fields
         conn.execute(
             "CREATE TABLE tasks (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT NOT NULL,
                 description TEXT,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                completed BOOLEAN DEFAULT FALSE,
+                due_date TEXT,
+                project_id INTEGER,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
             )",
             [],
         ).unwrap();
@@ -29,6 +32,8 @@ mod tests {
         let request = CreateTaskRequest {
             title: "Test Task".to_string(),
             description: Some("Test Description".to_string()),
+            due_date: None,
+            project_id: None,
         };
         
         let task = TaskRepository::create(&conn, &request).unwrap();
@@ -46,10 +51,14 @@ mod tests {
         let request1 = CreateTaskRequest {
             title: "Task 1".to_string(),
             description: None,
+            due_date: None,
+            project_id: None,
         };
         let request2 = CreateTaskRequest {
             title: "Task 2".to_string(),
             description: Some("Description 2".to_string()),
+            due_date: None,
+            project_id: None,
         };
         
         TaskRepository::create(&conn, &request1).unwrap();
@@ -69,6 +78,8 @@ mod tests {
         let request = CreateTaskRequest {
             title: "Original Title".to_string(),
             description: Some("Original Description".to_string()),
+            due_date: None,
+            project_id: None,
         };
         
         let task = TaskRepository::create(&conn, &request).unwrap();
@@ -76,6 +87,9 @@ mod tests {
         let update_request = UpdateTaskRequest {
             title: Some("Updated Title".to_string()),
             description: Some("Updated Description".to_string()),
+            due_date: None,
+            project_id: None,
+            completed: None,
         };
         
         let updated_task = TaskRepository::update(&conn, task.id, &update_request).unwrap();
@@ -92,6 +106,8 @@ mod tests {
         let request = CreateTaskRequest {
             title: "Task to Delete".to_string(),
             description: None,
+            due_date: None,
+            project_id: None,
         };
         
         let task = TaskRepository::create(&conn, &request).unwrap();

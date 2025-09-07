@@ -7,6 +7,8 @@ mod tests {
         let request = CreateTaskRequest {
             title: "Valid task title".to_string(),
             description: Some("Valid description".to_string()),
+            due_date: None,
+            project_id: None,
         };
         
         assert!(request.validate().is_ok());
@@ -17,6 +19,8 @@ mod tests {
         let request = CreateTaskRequest {
             title: "".to_string(),
             description: None,
+            due_date: None,
+            project_id: None,
         };
         
         let result = request.validate();
@@ -29,6 +33,8 @@ mod tests {
         let request = CreateTaskRequest {
             title: "   ".to_string(),
             description: None,
+            due_date: None,
+            project_id: None,
         };
         
         let result = request.validate();
@@ -41,6 +47,8 @@ mod tests {
         let request = CreateTaskRequest {
             title: "a".repeat(256),
             description: None,
+            due_date: None,
+            project_id: None,
         };
         
         let result = request.validate();
@@ -53,6 +61,8 @@ mod tests {
         let request = CreateTaskRequest {
             title: "Valid title".to_string(),
             description: Some("a".repeat(1001)),
+            due_date: None,
+            project_id: None,
         };
         
         let result = request.validate();
@@ -65,6 +75,9 @@ mod tests {
         let request = UpdateTaskRequest {
             title: Some("Valid updated title".to_string()),
             description: Some("Valid updated description".to_string()),
+            due_date: None,
+            project_id: None,
+            completed: None,
         };
         
         assert!(request.validate().is_ok());
@@ -75,6 +88,9 @@ mod tests {
         let request = UpdateTaskRequest {
             title: None,
             description: None,
+            due_date: None,
+            project_id: None,
+            completed: None,
         };
         
         assert!(request.validate().is_ok());
@@ -85,6 +101,9 @@ mod tests {
         let request = UpdateTaskRequest {
             title: Some("".to_string()),
             description: None,
+            due_date: None,
+            project_id: None,
+            completed: None,
         };
         
         let result = request.validate();

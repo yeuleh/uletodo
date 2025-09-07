@@ -77,10 +77,19 @@ export default function TaskForm({ task, onSubmit, onCancel, loading = false }: 
     }
 
     try {
+      // Convert date to ISO string if provided
+      let due_date_iso: string | undefined = undefined;
+      if (formData.due_date) {
+        const date = new Date(formData.due_date);
+        // Set to end of day to avoid timezone issues
+        date.setHours(23, 59, 59, 999);
+        due_date_iso = date.toISOString();
+      }
+
       const submitData = {
         title: formData.title.trim(),
         description: formData.description.trim() || undefined,
-        due_date: formData.due_date || undefined,
+        due_date: due_date_iso,
         project_id: formData.project_id,
       };
 

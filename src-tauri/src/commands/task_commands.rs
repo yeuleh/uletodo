@@ -62,3 +62,15 @@ pub async fn delete_task(id: i64) -> Result<(), String> {
         }
     })
 }
+
+/// Toggle task completion status
+#[tauri::command]
+pub async fn toggle_task_status(id: i64) -> Result<Task, String> {
+    let service = TaskService::new().map_err(|e| format!("Failed to initialize service: {}", e))?;
+    service.toggle_task_status(id).map_err(|e| {
+        match e {
+            rusqlite::Error::QueryReturnedNoRows => format!("Task with ID {} not found", id),
+            _ => format!("Failed to toggle task status: {}", e),
+        }
+    })
+}

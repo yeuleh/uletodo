@@ -17,8 +17,11 @@ mod integration_tests {
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT NOT NULL,
                 description TEXT,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                completed BOOLEAN DEFAULT FALSE,
+                due_date TEXT,
+                project_id INTEGER,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
             )",
             [],
         ).unwrap();
@@ -30,6 +33,8 @@ mod integration_tests {
         let create_request = CreateTaskRequest {
             title: "学习 Rust 编程".to_string(),
             description: Some("完成 Tauri 应用开发".to_string()),
+            due_date: None,
+            project_id: None,
         };
         
         let task1 = TaskRepository::create(&conn, &create_request).unwrap();
@@ -39,6 +44,8 @@ mod integration_tests {
         let create_request2 = CreateTaskRequest {
             title: "写技术博客".to_string(),
             description: None,
+            due_date: None,
+            project_id: None,
         };
         
         let task2 = TaskRepository::create(&conn, &create_request2).unwrap();
@@ -66,6 +73,9 @@ mod integration_tests {
         let update_request = UpdateTaskRequest {
             title: Some("学习 Rust 和 Tauri 开发".to_string()),
             description: Some("完成跨平台桌面应用开发，包括前后端".to_string()),
+            due_date: None,
+            project_id: None,
+            completed: None,
         };
         
         let updated_task = TaskRepository::update(&conn, task1.id, &update_request).unwrap();

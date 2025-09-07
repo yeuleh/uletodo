@@ -56,4 +56,10 @@ impl TaskService {
         let conn = self.db_manager.get_connection()?;
         TaskRepository::delete(&conn, id)
     }
+
+    /// Toggle task completion status
+    pub fn toggle_task_status(&self, id: i64) -> Result<Task> {
+        let conn = self.db_manager.get_connection()?;
+        TaskRepository::toggle_status(&conn, id)
+    }
 }

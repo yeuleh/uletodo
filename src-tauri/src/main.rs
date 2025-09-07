@@ -8,7 +8,7 @@ mod database;
 mod services;
 mod utils;
 
-use commands::task_commands::{create_task, get_all_tasks, get_tasks, get_task_by_id, update_task, delete_task};
+use commands::task_commands::{create_task, get_all_tasks, get_tasks, get_task_by_id, update_task, delete_task, toggle_task_status};
 
 fn main() {
     tauri::Builder::default()
@@ -18,7 +18,8 @@ fn main() {
             get_tasks,
             get_task_by_id,
             update_task,
-            delete_task
+            delete_task,
+            toggle_task_status
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

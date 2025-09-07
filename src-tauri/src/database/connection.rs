@@ -1,6 +1,7 @@
 use rusqlite::{Connection, Result};
 use std::path::PathBuf;
 use tauri::api::path::app_data_dir;
+use crate::database::migrations::MigrationManager;
 
 /// Database connection manager
 pub struct DatabaseManager {
@@ -31,27 +32,10 @@ impl DatabaseManager {
         Connection::open(&self.db_path)
     }
 
-    /// Initialize the database with required tables
+    /// Initialize the database with required tables and run migrations
     pub fn initialize(&self) -> Result<()> {
         let conn = self.get_connection()?;
-        self.create_tables(&conn)?;
-        Ok(())
-    }
-
-    /// Create required database tables
-    fn create_tables(&self, conn: &Connection) -> Result<()> {
-        // Create tasks table with simple structure
-        conn.execute(
-            "CREATE TABLE IF NOT EXISTS tasks (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                title TEXT NOT NULL,
-                description TEXT,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-            )",
-            [],
-        )?;
-
+        MigrationManager::run_migrations(&conn)?;
         Ok(())
     }
 }
