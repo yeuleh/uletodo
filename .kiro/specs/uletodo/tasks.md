@@ -2,13 +2,13 @@
 
 ## 阶段 1: 基础框架和简单任务 CRUD
 
-- [-] 1. 项目初始化和基础设置
+- [x] 1. 项目初始化和基础设置
   - 使用 create-tauri-app 创建 React + Tauri 项目结构
   - 配置 TypeScript、Tailwind CSS、ESLint 和 Prettier
   - 设置基本的项目目录结构和配置文件
   - _需求: 7.1, 7.2, 7.3_
 
-- [ ] 2. 简单数据库和任务模型
+- [x] 2. 简单数据库和任务模型
   - 创建 SQLite 数据库连接管理模块
   - 创建简单的 tasks 表 (id, title, description)
   - 实现基础的数据库操作函数
