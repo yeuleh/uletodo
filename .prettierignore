@@ -1,7 +1,0 @@
-dist
-build
-node_modules
-*.min.js
-*.min.css
-src-tauri/target
-.git
